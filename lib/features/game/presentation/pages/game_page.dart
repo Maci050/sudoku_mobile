@@ -11,6 +11,7 @@ class GamePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final board = ref.watch(gameControllerProvider);
+    final controller = ref.read(gameControllerProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -41,6 +42,14 @@ class GamePage extends ConsumerWidget {
               child: Keypad(
                 onPressed: (number) {
                   ref.read(gameControllerProvider.notifier).inputNumber(number);
+
+                  if (controller.isCompleted()) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('¡Sudoku completado!'),
+                      ),
+                    );
+                  }
                 },
               ),
             ),
