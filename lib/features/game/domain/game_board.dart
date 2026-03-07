@@ -45,8 +45,8 @@ class GameBoard {
       notes: notes ?? this.notes,
       elapsed: elapsed ?? this.elapsed,
       isPaused: isPaused ?? this.isPaused,
-      selectedRow: selectedRow,
-      selectedCol: selectedCol,
+      selectedRow: selectedRow ?? this.selectedRow,
+      selectedCol: selectedCol ?? this.selectedCol,
       notesMode: notesMode ?? this.notesMode,
     );
   }
