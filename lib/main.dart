@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'features/game/presentation/pages/game_page.dart';
 
 void main() {
-  runApp(const SudokuApp());
+  runApp(const ProviderScope(child: SudokuApp()));
 }
 
 class SudokuApp extends StatelessWidget {
@@ -16,27 +18,7 @@ class SudokuApp extends StatelessWidget {
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
       ),
-      home: const HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Sudoku"),
-        centerTitle: true,
-      ),
-      body: const Center(
-        child: Text(
-          "Sudoku App",
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
+      home: const GamePage(),
     );
   }
 }
