@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/sudoku_generator.dart';
+import '../../domain/difficulty.dart';
 import '../../domain/game_board.dart';
 
 final gameControllerProvider =
@@ -7,40 +11,44 @@ final gameControllerProvider =
 });
 
 class GameController extends StateNotifier<GameBoard> {
-  GameController() : super(_buildTestBoard());
+  GameController() : super(SudokuGenerator().generate(Difficulty.easy)) {
+    _startTimer();
+  }
 
-  static GameBoard _buildTestBoard() {
-    final puzzle = [
-      [5, 3, 0, 0, 7, 0, 0, 0, 0],
-      [6, 0, 0, 1, 9, 5, 0, 0, 0],
-      [0, 9, 8, 0, 0, 0, 0, 6, 0],
-      [8, 0, 0, 0, 6, 0, 0, 0, 3],
-      [4, 0, 0, 8, 0, 3, 0, 0, 1],
-      [7, 0, 0, 0, 2, 0, 0, 0, 6],
-      [0, 6, 0, 0, 0, 0, 2, 8, 0],
-      [0, 0, 0, 4, 1, 9, 0, 0, 5],
-      [0, 0, 0, 0, 8, 0, 0, 7, 9],
-    ];
+  final SudokuGenerator _generator = SudokuGenerator();
+  Timer? _timer;
 
-    final solution = [
-      [5, 3, 4, 6, 7, 8, 9, 1, 2],
-      [6, 7, 2, 1, 9, 5, 3, 4, 8],
-      [1, 9, 8, 3, 4, 2, 5, 6, 7],
-      [8, 5, 9, 7, 6, 1, 4, 2, 3],
-      [4, 2, 6, 8, 5, 3, 7, 9, 1],
-      [7, 1, 3, 9, 2, 4, 8, 5, 6],
-      [9, 6, 1, 5, 3, 7, 2, 8, 4],
-      [2, 8, 7, 4, 1, 9, 6, 3, 5],
-      [3, 4, 5, 2, 8, 6, 1, 7, 9],
-    ];
+  void newGame(Difficulty difficulty) {
+    state = _generator.generate(difficulty);
+    _startTimer();
+  }
 
-    return GameBoard.fromPuzzle(
-      puzzle: puzzle,
-      solution: solution,
-    );
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!state.isPaused && !isCompleted()) {
+        state = state.copyWith(
+          elapsed: state.elapsed + const Duration(seconds: 1),
+        );
+      }
+    });
+  }
+
+  void pauseGame() {
+    state = state.copyWith(isPaused: true);
+  }
+
+  void resumeGame() {
+    state = state.copyWith(isPaused: false);
+  }
+
+  void togglePause() {
+    state = state.copyWith(isPaused: !state.isPaused);
   }
 
   void selectCell(int row, int col) {
+    if (state.isPaused) return;
+
     state = state.copyWith(
       selectedRow: row,
       selectedCol: col,
@@ -48,12 +56,16 @@ class GameController extends StateNotifier<GameBoard> {
   }
 
   void toggleNotesMode() {
+    if (state.isPaused) return;
+
     state = state.copyWith(
       notesMode: !state.notesMode,
     );
   }
 
   void inputNumber(int number) {
+    if (state.isPaused) return;
+
     final row = state.selectedRow;
     final col = state.selectedCol;
 
@@ -90,6 +102,8 @@ class GameController extends StateNotifier<GameBoard> {
   }
 
   void eraseSelectedCell() {
+    if (state.isPaused) return;
+
     final row = state.selectedRow;
     final col = state.selectedCol;
 
@@ -130,5 +144,18 @@ class GameController extends StateNotifier<GameBoard> {
       }
     }
     return true;
+  }
+
+  String formattedElapsed() {
+    final totalSeconds = state.elapsed.inSeconds;
+    final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
+    final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 }

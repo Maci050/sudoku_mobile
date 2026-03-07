@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/game_controller.dart';
+import '../widgets/difficulty_selector.dart';
 import '../widgets/game_toolbar.dart';
 import '../widgets/keypad.dart';
 import '../widgets/sudoku_grid.dart';
+import '../widgets/timer_bar.dart';
 
 class GamePage extends ConsumerWidget {
   const GamePage({super.key});
@@ -19,40 +21,103 @@ class GamePage extends ConsumerWidget {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: SudokuGrid(),
-            ),
-            const SizedBox(height: 20),
-            GameToolbar(
-              notesMode: board.notesMode,
-              onToggleNotes: () {
-                ref.read(gameControllerProvider.notifier).toggleNotesMode();
-              },
-              onErase: () {
-                ref.read(gameControllerProvider.notifier).eraseSelectedCell();
-              },
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Keypad(
-                onPressed: (number) {
-                  ref.read(gameControllerProvider.notifier).inputNumber(number);
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 16),
+                  TimerBar(
+                    timeText: controller.formattedElapsed(),
+                    isPaused: board.isPaused,
+                    onTogglePause: () {
+                      ref.read(gameControllerProvider.notifier).togglePause();
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  DifficultySelector(
+                    currentDifficulty: board.difficulty,
+                    onSelected: (difficulty) {
+                      ref.read(gameControllerProvider.notifier).newGame(difficulty);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: SudokuGrid(),
+                  ),
+                  const SizedBox(height: 20),
+                  GameToolbar(
+                    notesMode: board.notesMode,
+                    onNewGame: () {
+                      ref.read(gameControllerProvider.notifier).newGame(board.difficulty);
+                    },
+                    onToggleNotes: () {
+                      ref.read(gameControllerProvider.notifier).toggleNotesMode();
+                    },
+                    onErase: () {
+                      ref.read(gameControllerProvider.notifier).eraseSelectedCell();
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Keypad(
+                      onPressed: (number) {
+                        ref.read(gameControllerProvider.notifier).inputNumber(number);
 
-                  if (controller.isCompleted()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('¡Sudoku completado!'),
-                      ),
-                    );
-                  }
-                },
+                        if (controller.isCompleted()) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('¡Sudoku completado!'),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
+            if (board.isPaused)
+              Positioned.fill(
+                child: Container(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.pause_circle_filled,
+                          size: 72,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Juego en pausa',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'El tablero está oculto para evitar trampas',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 24),
+                        FilledButton.icon(
+                          onPressed: () {
+                            ref.read(gameControllerProvider.notifier).resumeGame();
+                          },
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Continuar'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
