@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../history/presentation/history_page.dart';
 import '../controllers/game_controller.dart';
 import '../widgets/difficulty_selector.dart';
 import '../widgets/game_toolbar.dart';
@@ -19,6 +20,19 @@ class GamePage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Sudoku'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const HistoryPage(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Stack(

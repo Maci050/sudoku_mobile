@@ -5,6 +5,8 @@ import '../../data/game_storage.dart';
 import '../../data/sudoku_generator.dart';
 import '../../domain/difficulty.dart';
 import '../../domain/game_board.dart';
+import '../../../history/data/history_storage.dart';
+import '../../../history/domain/completed_game.dart';
 
 final gameControllerProvider =
     StateNotifierProvider<GameController, GameBoard>((ref) {
@@ -16,6 +18,7 @@ class GameController extends StateNotifier<GameBoard> {
     _restoreOrCreateGame();
   }
 
+  final HistoryStorage _historyStorage = HistoryStorage();
   final SudokuGenerator _generator = SudokuGenerator();
   final GameStorage _storage = GameStorage();
   Timer? _timer;
@@ -172,6 +175,15 @@ class GameController extends StateNotifier<GameBoard> {
         }
       }
     }
+    
+    _historyStorage.addGame(
+      CompletedGame(
+        difficulty: state.difficulty,
+        time: state.elapsed,
+        completedAt: DateTime.now(),
+      ),
+    );
+
     return true;
   }
 
