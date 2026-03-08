@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../history/presentation/history_page.dart';
+import '../../domain/difficulty.dart';
 import '../controllers/game_controller.dart';
 import '../widgets/difficulty_selector.dart';
 import '../widgets/game_settings_sheet.dart';
@@ -8,19 +9,52 @@ import '../widgets/game_toolbar.dart';
 import '../widgets/keypad.dart';
 import '../widgets/sudoku_grid.dart';
 import '../widgets/timer_bar.dart';
+import 'game_result_page.dart';
 
-class GamePage extends ConsumerWidget {
-  const GamePage({super.key});
+class GamePage extends ConsumerStatefulWidget {
+  final Difficulty? startDifficulty;
+  final bool startDailyChallenge;
+
+  const GamePage({
+    super.key,
+    this.startDifficulty,
+    this.startDailyChallenge = false,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GamePage> createState() => _GamePageState();
+}
+
+class _GamePageState extends ConsumerState<GamePage> {
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_initialized) return;
+    _initialized = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = ref.read(gameControllerProvider.notifier);
+
+      if (widget.startDailyChallenge) {
+        controller.startDailyChallenge();
+      } else if (widget.startDifficulty != null) {
+        controller.newGame(widget.startDifficulty!);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final board = ref.watch(gameControllerProvider);
     final controller = ref.read(gameControllerProvider.notifier);
     final dailyCompleted = controller.isTodayDailyChallengeCompleted();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sudoku'),
+        title: Text(board.isDailyChallenge ? 'Desafío diario' : 'Sudoku'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -60,36 +94,40 @@ class GamePage extends ConsumerWidget {
                       ),
                     ),
                   const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        FilledButton.tonalIcon(
-                          onPressed: () {
-                            ref.read(gameControllerProvider.notifier).startDailyChallenge();
-                          },
-                          icon: Icon(
-                            dailyCompleted ? Icons.check_circle : Icons.calendar_today,
+                  if (!board.isDailyChallenge)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          FilledButton.tonalIcon(
+                            onPressed: () {
+                              ref.read(gameControllerProvider.notifier).startDailyChallenge();
+                            },
+                            icon: Icon(
+                              dailyCompleted
+                                  ? Icons.check_circle
+                                  : Icons.calendar_today,
+                            ),
+                            label: Text(
+                              dailyCompleted
+                                  ? 'Desafío diario completado'
+                                  : 'Jugar desafío diario',
+                            ),
                           ),
-                          label: Text(
-                            dailyCompleted
-                                ? 'Desafío diario completado'
-                                : 'Jugar desafío diario',
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 16),
-                  DifficultySelector(
-                    currentDifficulty: board.difficulty,
-                    onSelected: (difficulty) {
-                      ref.read(gameControllerProvider.notifier).newGame(difficulty);
-                    },
-                  ),
+                  if (!board.isDailyChallenge)
+                    DifficultySelector(
+                      currentDifficulty: board.difficulty,
+                      onSelected: (difficulty) {
+                        ref.read(gameControllerProvider.notifier).newGame(difficulty);
+                      },
+                    ),
                   const SizedBox(height: 16),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
@@ -141,23 +179,41 @@ class GamePage extends ConsumerWidget {
                     child: Keypad(
                       disabledNumbers: controller.usedUpNumbers(),
                       onPressed: (number) {
+                        final wasFinished = board.isFinished;
+
                         ref.read(gameControllerProvider.notifier).inputNumber(number);
 
-                        if (controller.checkAndHandleCompletion()) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                board.isDailyChallenge
-                                    ? '¡Desafío diario completado!'
-                                    : '¡Sudoku completado!',
+                        final updatedController =
+                            ref.read(gameControllerProvider.notifier);
+                        final updatedBoard = ref.read(gameControllerProvider);
+
+                        if (!wasFinished &&
+                            updatedController.checkAndHandleCompletion()) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => GameResultPage(
+                                won: true,
+                                isDailyChallenge: updatedBoard.isDailyChallenge,
+                                difficulty: updatedBoard.difficulty,
+                                elapsed: updatedBoard.elapsed,
+                                mistakes: updatedBoard.mistakes,
                               ),
                             ),
                           );
-                        } else if (board.limitMistakesEnabled &&
-                            board.mistakes >= board.maxMistakes) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Has perdido por demasiados errores'),
+                        } else if (updatedBoard.limitMistakesEnabled &&
+                            updatedBoard.mistakes >= updatedBoard.maxMistakes &&
+                            updatedBoard.isFinished) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => GameResultPage(
+                                won: false,
+                                isDailyChallenge: updatedBoard.isDailyChallenge,
+                                difficulty: updatedBoard.difficulty,
+                                elapsed: updatedBoard.elapsed,
+                                mistakes: updatedBoard.mistakes,
+                              ),
                             ),
                           );
                         }
