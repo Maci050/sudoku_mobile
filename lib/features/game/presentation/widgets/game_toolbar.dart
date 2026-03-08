@@ -5,6 +5,7 @@ class GameToolbar extends StatelessWidget {
   final VoidCallback onNewGame;
   final VoidCallback onToggleNotes;
   final VoidCallback onErase;
+  final VoidCallback onOpenSettings;
 
   const GameToolbar({
     super.key,
@@ -12,12 +13,14 @@ class GameToolbar extends StatelessWidget {
     required this.onNewGame,
     required this.onToggleNotes,
     required this.onErase,
+    required this.onOpenSettings,
   });
 
   @override
   Widget build(BuildContext context) {
     return Wrap(
       spacing: 12,
+      runSpacing: 12,
       alignment: WrapAlignment.center,
       children: [
         FilledButton.tonal(
@@ -31,6 +34,10 @@ class GameToolbar extends StatelessWidget {
         FilledButton.tonal(
           onPressed: onErase,
           child: const Text('Borrar'),
+        ),
+        FilledButton.tonal(
+          onPressed: onOpenSettings,
+          child: const Text('Ayudas'),
         ),
       ],
     );

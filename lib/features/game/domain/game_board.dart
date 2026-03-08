@@ -15,6 +15,15 @@ class GameBoard {
   final bool isDailyChallenge;
   final String? dailyChallengeId;
 
+  final bool limitMistakesEnabled;
+  final int mistakes;
+  final int maxMistakes;
+  final bool highlightErrors;
+  final bool highlightDuplicates;
+  final bool hideUsedNumbers;
+  final bool highlightRegions;
+  final bool highlightSameNumbers;
+
   const GameBoard({
     required this.values,
     required this.fixedCells,
@@ -26,6 +35,14 @@ class GameBoard {
     required this.isFinished,
     required this.isDailyChallenge,
     required this.dailyChallengeId,
+    required this.limitMistakesEnabled,
+    required this.mistakes,
+    required this.maxMistakes,
+    required this.highlightErrors,
+    required this.highlightDuplicates,
+    required this.hideUsedNumbers,
+    required this.highlightRegions,
+    required this.highlightSameNumbers,
     this.selectedRow,
     this.selectedCol,
     this.notesMode = false,
@@ -42,6 +59,14 @@ class GameBoard {
     bool? isFinished,
     bool? isDailyChallenge,
     String? dailyChallengeId,
+    bool? limitMistakesEnabled,
+    int? mistakes,
+    int? maxMistakes,
+    bool? highlightErrors,
+    bool? highlightDuplicates,
+    bool? hideUsedNumbers,
+    bool? highlightRegions,
+    bool? highlightSameNumbers,
     int? selectedRow,
     int? selectedCol,
     bool? notesMode,
@@ -57,6 +82,14 @@ class GameBoard {
       isFinished: isFinished ?? this.isFinished,
       isDailyChallenge: isDailyChallenge ?? this.isDailyChallenge,
       dailyChallengeId: dailyChallengeId ?? this.dailyChallengeId,
+      limitMistakesEnabled: limitMistakesEnabled ?? this.limitMistakesEnabled,
+      mistakes: mistakes ?? this.mistakes,
+      maxMistakes: maxMistakes ?? this.maxMistakes,
+      highlightErrors: highlightErrors ?? this.highlightErrors,
+      highlightDuplicates: highlightDuplicates ?? this.highlightDuplicates,
+      hideUsedNumbers: hideUsedNumbers ?? this.hideUsedNumbers,
+      highlightRegions: highlightRegions ?? this.highlightRegions,
+      highlightSameNumbers: highlightSameNumbers ?? this.highlightSameNumbers,
       selectedRow: selectedRow ?? this.selectedRow,
       selectedCol: selectedCol ?? this.selectedCol,
       notesMode: notesMode ?? this.notesMode,
@@ -79,15 +112,20 @@ class GameBoard {
           .toList(),
       solution: solution,
       difficulty: difficulty,
-      notes: List.generate(
-        9,
-        (_) => List.generate(9, (_) => <int>{}),
-      ),
+      notes: List.generate(9, (_) => List.generate(9, (_) => <int>{})),
       elapsed: Duration.zero,
       isPaused: false,
       isFinished: false,
       isDailyChallenge: isDailyChallenge,
       dailyChallengeId: dailyChallengeId,
+      limitMistakesEnabled: false,
+      mistakes: 0,
+      maxMistakes: 3,
+      highlightErrors: true,
+      highlightDuplicates: true,
+      hideUsedNumbers: true,
+      highlightRegions: true,
+      highlightSameNumbers: true,
     );
   }
 
@@ -97,58 +135,61 @@ class GameBoard {
       fixedCells: List.generate(9, (_) => List.generate(9, (_) => false)),
       solution: List.generate(9, (_) => List.generate(9, (_) => 0)),
       difficulty: Difficulty.easy,
-      notes: List.generate(
-        9,
-        (_) => List.generate(9, (_) => <int>{}),
-      ),
+      notes: List.generate(9, (_) => List.generate(9, (_) => <int>{})),
       elapsed: Duration.zero,
       isPaused: false,
       isFinished: false,
       isDailyChallenge: false,
       dailyChallengeId: null,
+      limitMistakesEnabled: false,
+      mistakes: 0,
+      maxMistakes: 3,
+      highlightErrors: true,
+      highlightDuplicates: true,
+      hideUsedNumbers: true,
+      highlightRegions: true,
+      highlightSameNumbers: true,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'values': values
-          .map((row) => row.map((value) => value ?? 0).toList())
-          .toList(),
+      'values': values.map((row) => row.map((value) => value ?? 0).toList()).toList(),
       'fixedCells': fixedCells,
       'solution': solution,
       'difficulty': difficulty.name,
       'selectedRow': selectedRow,
       'selectedCol': selectedCol,
       'notesMode': notesMode,
-      'notes': notes
-          .map((row) => row.map((cellNotes) => cellNotes.toList()).toList())
-          .toList(),
+      'notes': notes.map((row) => row.map((cellNotes) => cellNotes.toList()).toList()).toList(),
       'elapsedSeconds': elapsed.inSeconds,
       'isPaused': isPaused,
       'isFinished': isFinished,
       'isDailyChallenge': isDailyChallenge,
       'dailyChallengeId': dailyChallengeId,
+      'limitMistakesEnabled': limitMistakesEnabled,
+      'mistakes': mistakes,
+      'maxMistakes': maxMistakes,
+      'highlightErrors': highlightErrors,
+      'highlightDuplicates': highlightDuplicates,
+      'hideUsedNumbers': hideUsedNumbers,
+      'highlightRegions': highlightRegions,
+      'highlightSameNumbers': highlightSameNumbers,
     };
   }
 
   factory GameBoard.fromMap(Map<dynamic, dynamic> map) {
     return GameBoard(
       values: (map['values'] as List)
-          .map<List<int?>>(
-            (row) => (row as List)
-                .map<int?>((value) => value == 0 ? null : value as int)
-                .toList(),
-          )
+          .map<List<int?>>((row) => (row as List)
+              .map<int?>((value) => value == 0 ? null : value as int)
+              .toList())
           .toList(),
       fixedCells: (map['fixedCells'] as List)
-          .map<List<bool>>(
-            (row) => (row as List).map<bool>((value) => value as bool).toList(),
-          )
+          .map<List<bool>>((row) => (row as List).map<bool>((value) => value as bool).toList())
           .toList(),
       solution: (map['solution'] as List)
-          .map<List<int>>(
-            (row) => (row as List).map<int>((value) => value as int).toList(),
-          )
+          .map<List<int>>((row) => (row as List).map<int>((value) => value as int).toList())
           .toList(),
       difficulty: Difficulty.values.firstWhere(
         (d) => d.name == map['difficulty'],
@@ -158,21 +199,24 @@ class GameBoard {
       selectedCol: map['selectedCol'] as int?,
       notesMode: map['notesMode'] as bool? ?? false,
       notes: (map['notes'] as List)
-          .map<List<Set<int>>>(
-            (row) => (row as List)
-                .map<Set<int>>(
-                  (cellNotes) => (cellNotes as List)
-                      .map<int>((value) => value as int)
-                      .toSet(),
-                )
-                .toList(),
-          )
+          .map<List<Set<int>>>((row) => (row as List)
+              .map<Set<int>>((cellNotes) =>
+                  (cellNotes as List).map<int>((value) => value as int).toSet())
+              .toList())
           .toList(),
       elapsed: Duration(seconds: map['elapsedSeconds'] as int? ?? 0),
       isPaused: map['isPaused'] as bool? ?? false,
       isFinished: map['isFinished'] as bool? ?? false,
       isDailyChallenge: map['isDailyChallenge'] as bool? ?? false,
       dailyChallengeId: map['dailyChallengeId'] as String?,
+      limitMistakesEnabled: map['limitMistakesEnabled'] as bool? ?? false,
+      mistakes: map['mistakes'] as int? ?? 0,
+      maxMistakes: map['maxMistakes'] as int? ?? 3,
+      highlightErrors: map['highlightErrors'] as bool? ?? true,
+      highlightDuplicates: map['highlightDuplicates'] as bool? ?? true,
+      hideUsedNumbers: map['hideUsedNumbers'] as bool? ?? true,
+      highlightRegions: map['highlightRegions'] as bool? ?? true,
+      highlightSameNumbers: map['highlightSameNumbers'] as bool? ?? true,
     );
   }
 }

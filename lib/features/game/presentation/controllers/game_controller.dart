@@ -86,6 +86,36 @@ class GameController extends StateNotifier<GameBoard> {
     });
   }
 
+  void toggleLimitMistakes(bool value) {
+    state = state.copyWith(limitMistakesEnabled: value);
+    _saveGame();
+  }
+
+  void toggleHighlightErrors(bool value) {
+    state = state.copyWith(highlightErrors: value);
+    _saveGame();
+  }
+
+  void toggleHighlightDuplicates(bool value) {
+    state = state.copyWith(highlightDuplicates: value);
+    _saveGame();
+  }
+
+  void toggleHideUsedNumbers(bool value) {
+    state = state.copyWith(hideUsedNumbers: value);
+    _saveGame();
+  }
+
+  void toggleHighlightRegions(bool value) {
+    state = state.copyWith(highlightRegions: value);
+    _saveGame();
+  }
+
+  void toggleHighlightSameNumbers(bool value) {
+    state = state.copyWith(highlightSameNumbers: value);
+    _saveGame();
+  }
+
   void pauseGame() {
     if (state.isFinished) return;
     state = state.copyWith(isPaused: true);
@@ -153,13 +183,26 @@ class GameController extends StateNotifier<GameBoard> {
         .map((r) => r.map((s) => {...s}).toList())
         .toList();
 
+    final isWrong = number != state.solution[row][col];
+
     newValues[row][col] = number;
     newNotes[row][col].clear();
 
     state = state.copyWith(
       values: newValues,
       notes: newNotes,
+      mistakes: (state.limitMistakesEnabled && isWrong)
+          ? state.mistakes + 1
+          : state.mistakes,
     );
+
+    if (state.limitMistakesEnabled && state.mistakes >= state.maxMistakes) {
+      state = state.copyWith(
+        isFinished: true,
+        isPaused: false,
+      );
+    }
+
     _saveGame();
   }
 
@@ -192,10 +235,85 @@ class GameController extends StateNotifier<GameBoard> {
   }
 
   bool isWrongValue(int row, int col) {
+    if (!state.highlightErrors) return false;
+
     final value = state.values[row][col];
     if (value == null) return false;
     if (state.fixedCells[row][col]) return false;
     return value != state.solution[row][col];
+  }
+
+  bool hasDuplicate(int row, int col) {
+    if (!state.highlightDuplicates) return false;
+
+    final value = state.values[row][col];
+    if (value == null) return false;
+
+    for (int i = 0; i < 9; i++) {
+      if (i != col && state.values[row][i] == value) return true;
+      if (i != row && state.values[i][col] == value) return true;
+    }
+
+    final startRow = (row ~/ 3) * 3;
+    final startCol = (col ~/ 3) * 3;
+
+    for (int r = startRow; r < startRow + 3; r++) {
+      for (int c = startCol; c < startCol + 3; c++) {
+        if ((r != row || c != col) && state.values[r][c] == value) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool shouldHighlightCell(int row, int col) {
+    final selectedRow = state.selectedRow;
+    final selectedCol = state.selectedCol;
+
+    if (selectedRow == null || selectedCol == null) return false;
+    if (selectedRow == row && selectedCol == col) return true;
+
+    if (state.highlightRegions) {
+      final sameRow = selectedRow == row;
+      final sameCol = selectedCol == col;
+      final sameBox = (selectedRow ~/ 3 == row ~/ 3) &&
+          (selectedCol ~/ 3 == col ~/ 3);
+
+      if (sameRow || sameCol || sameBox) return true;
+    }
+
+    if (state.highlightSameNumbers) {
+      final selectedValue = state.values[selectedRow][selectedCol];
+      final currentValue = state.values[row][col];
+      if (selectedValue != null &&
+          currentValue != null &&
+          selectedValue == currentValue) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  Set<int> usedUpNumbers() {
+    if (!state.hideUsedNumbers) return {};
+
+    final counts = <int, int>{for (int i = 1; i <= 9; i++) i: 0};
+
+    for (final row in state.values) {
+      for (final value in row) {
+        if (value != null) {
+          counts[value] = counts[value]! + 1;
+        }
+      }
+    }
+
+    return counts.entries
+        .where((entry) => entry.value >= 9)
+        .map((entry) => entry.key)
+        .toSet();
   }
 
   bool isCompleted() {

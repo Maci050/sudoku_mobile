@@ -27,12 +27,24 @@ class SudokuGrid extends ConsumerWidget {
                   final isSelected =
                       board.selectedRow == row && board.selectedCol == col;
                   final hasError = controller.isWrongValue(row, col);
+                  final hasDuplicate = controller.hasDuplicate(row, col);
+                  final isHighlighted = controller.shouldHighlightCell(row, col);
 
                   Color backgroundColor = Colors.white;
 
+                  if (isHighlighted) {
+                    backgroundColor = Colors.blue.withValues(alpha: 0.08);
+                  }
+
+                  if (hasDuplicate) {
+                    backgroundColor = Colors.orange.withValues(alpha: 0.18);
+                  }
+
                   if (hasError) {
                     backgroundColor = Colors.red.withValues(alpha: 0.15);
-                  } else if (isSelected) {
+                  }
+
+                  if (isSelected) {
                     backgroundColor = Colors.blue.withValues(alpha: 0.20);
                   }
 
@@ -106,10 +118,7 @@ class _NotesView extends StatelessWidget {
           return Center(
             child: Text(
               notes.contains(number) ? '$number' : '',
-              style: const TextStyle(
-                fontSize: 10,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 10, color: Colors.grey),
             ),
           );
         }),

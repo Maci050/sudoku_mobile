@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../history/presentation/history_page.dart';
 import '../controllers/game_controller.dart';
 import '../widgets/difficulty_selector.dart';
+import '../widgets/game_settings_sheet.dart';
 import '../widgets/game_toolbar.dart';
 import '../widgets/keypad.dart';
 import '../widgets/sudoku_grid.dart';
@@ -49,6 +50,15 @@ class GamePage extends ConsumerWidget {
                       ref.read(gameControllerProvider.notifier).togglePause();
                     },
                   ),
+                  const SizedBox(height: 12),
+                  if (board.limitMistakesEnabled)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Errores: ${board.mistakes}/${board.maxMistakes}',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -97,11 +107,39 @@ class GamePage extends ConsumerWidget {
                     onErase: () {
                       ref.read(gameControllerProvider.notifier).eraseSelectedCell();
                     },
+                    onOpenSettings: () {
+                      showModalBottomSheet(
+                        context: context,
+                        showDragHandle: true,
+                        builder: (_) => GameSettingsSheet(
+                          board: board,
+                          onToggleLimitMistakes: (value) {
+                            ref.read(gameControllerProvider.notifier).toggleLimitMistakes(value);
+                          },
+                          onToggleHighlightErrors: (value) {
+                            ref.read(gameControllerProvider.notifier).toggleHighlightErrors(value);
+                          },
+                          onToggleHighlightDuplicates: (value) {
+                            ref.read(gameControllerProvider.notifier).toggleHighlightDuplicates(value);
+                          },
+                          onToggleHideUsedNumbers: (value) {
+                            ref.read(gameControllerProvider.notifier).toggleHideUsedNumbers(value);
+                          },
+                          onToggleHighlightRegions: (value) {
+                            ref.read(gameControllerProvider.notifier).toggleHighlightRegions(value);
+                          },
+                          onToggleHighlightSameNumbers: (value) {
+                            ref.read(gameControllerProvider.notifier).toggleHighlightSameNumbers(value);
+                          },
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Keypad(
+                      disabledNumbers: controller.usedUpNumbers(),
                       onPressed: (number) {
                         ref.read(gameControllerProvider.notifier).inputNumber(number);
 
@@ -113,6 +151,13 @@ class GamePage extends ConsumerWidget {
                                     ? '¡Desafío diario completado!'
                                     : '¡Sudoku completado!',
                               ),
+                            ),
+                          );
+                        } else if (board.limitMistakesEnabled &&
+                            board.mistakes >= board.maxMistakes) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Has perdido por demasiados errores'),
                             ),
                           );
                         }
