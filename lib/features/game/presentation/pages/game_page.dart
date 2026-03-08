@@ -7,6 +7,7 @@ import '../widgets/game_toolbar.dart';
 import '../widgets/keypad.dart';
 import '../widgets/sudoku_grid.dart';
 import '../widgets/timer_bar.dart';
+import '../../domain/difficulty.dart';
 
 class GamePage extends ConsumerWidget {
   const GamePage({super.key});
@@ -80,10 +81,18 @@ class GamePage extends ConsumerWidget {
                       onPressed: (number) {
                         ref.read(gameControllerProvider.notifier).inputNumber(number);
 
-                        if (controller.isCompleted()) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('¡Sudoku completado!'),
+                        if (controller.checkAndHandleCompletion()) {
+                          showDialog(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              title: const Text('¡Sudoku completado!'),
+                              content: Text('Has completado el Sudoku ${board.difficulty.label} en ${controller.formattedElapsed()}'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Cerrar'),
+                                ),
+                              ],
                             ),
                           );
                         }

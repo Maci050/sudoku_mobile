@@ -18,9 +18,9 @@ class GameController extends StateNotifier<GameBoard> {
     _restoreOrCreateGame();
   }
 
-  final HistoryStorage _historyStorage = HistoryStorage();
   final SudokuGenerator _generator = SudokuGenerator();
   final GameStorage _storage = GameStorage();
+  final HistoryStorage _historyStorage = HistoryStorage();
   Timer? _timer;
 
   void _restoreOrCreateGame() {
@@ -49,7 +49,7 @@ class GameController extends StateNotifier<GameBoard> {
   void _startTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!state.isPaused && !isCompleted()) {
+      if (!state.isPaused && !state.isFinished) {
         state = state.copyWith(
           elapsed: state.elapsed + const Duration(seconds: 1),
         );
@@ -59,22 +59,25 @@ class GameController extends StateNotifier<GameBoard> {
   }
 
   void pauseGame() {
+    if (state.isFinished) return;
     state = state.copyWith(isPaused: true);
     _saveGame();
   }
 
   void resumeGame() {
+    if (state.isFinished) return;
     state = state.copyWith(isPaused: false);
     _saveGame();
   }
 
   void togglePause() {
+    if (state.isFinished) return;
     state = state.copyWith(isPaused: !state.isPaused);
     _saveGame();
   }
 
   void selectCell(int row, int col) {
-    if (state.isPaused) return;
+    if (state.isPaused || state.isFinished) return;
 
     state = state.copyWith(
       selectedRow: row,
@@ -84,7 +87,7 @@ class GameController extends StateNotifier<GameBoard> {
   }
 
   void toggleNotesMode() {
-    if (state.isPaused) return;
+    if (state.isPaused || state.isFinished) return;
 
     state = state.copyWith(
       notesMode: !state.notesMode,
@@ -93,7 +96,7 @@ class GameController extends StateNotifier<GameBoard> {
   }
 
   void inputNumber(int number) {
-    if (state.isPaused) return;
+    if (state.isPaused || state.isFinished) return;
 
     final row = state.selectedRow;
     final col = state.selectedCol;
@@ -133,7 +136,7 @@ class GameController extends StateNotifier<GameBoard> {
   }
 
   void eraseSelectedCell() {
-    if (state.isPaused) return;
+    if (state.isPaused || state.isFinished) return;
 
     final row = state.selectedRow;
     final col = state.selectedCol;
@@ -175,7 +178,13 @@ class GameController extends StateNotifier<GameBoard> {
         }
       }
     }
-    
+    return true;
+  }
+
+  bool checkAndHandleCompletion() {
+    if (state.isFinished) return false;
+    if (!isCompleted()) return false;
+
     _historyStorage.addGame(
       CompletedGame(
         difficulty: state.difficulty,
@@ -183,6 +192,12 @@ class GameController extends StateNotifier<GameBoard> {
         completedAt: DateTime.now(),
       ),
     );
+
+    state = state.copyWith(
+      isFinished: true,
+      isPaused: false,
+    );
+    _saveGame();
 
     return true;
   }

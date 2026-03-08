@@ -11,6 +11,7 @@ class GameBoard {
   final List<List<Set<int>>> notes;
   final Duration elapsed;
   final bool isPaused;
+  final bool isFinished;
 
   const GameBoard({
     required this.values,
@@ -20,6 +21,7 @@ class GameBoard {
     required this.notes,
     required this.elapsed,
     required this.isPaused,
+    required this.isFinished,
     this.selectedRow,
     this.selectedCol,
     this.notesMode = false,
@@ -33,6 +35,7 @@ class GameBoard {
     List<List<Set<int>>>? notes,
     Duration? elapsed,
     bool? isPaused,
+    bool? isFinished,
     int? selectedRow,
     int? selectedCol,
     bool? notesMode,
@@ -45,6 +48,7 @@ class GameBoard {
       notes: notes ?? this.notes,
       elapsed: elapsed ?? this.elapsed,
       isPaused: isPaused ?? this.isPaused,
+      isFinished: isFinished ?? this.isFinished,
       selectedRow: selectedRow ?? this.selectedRow,
       selectedCol: selectedCol ?? this.selectedCol,
       notesMode: notesMode ?? this.notesMode,
@@ -71,6 +75,7 @@ class GameBoard {
       ),
       elapsed: Duration.zero,
       isPaused: false,
+      isFinished: false,
     );
   }
 
@@ -86,6 +91,7 @@ class GameBoard {
       ),
       elapsed: Duration.zero,
       isPaused: false,
+      isFinished: false,
     );
   }
 
@@ -105,6 +111,7 @@ class GameBoard {
           .toList(),
       'elapsedSeconds': elapsed.inSeconds,
       'isPaused': isPaused,
+      'isFinished': isFinished,
     };
   }
 
@@ -147,6 +154,7 @@ class GameBoard {
           .toList(),
       elapsed: Duration(seconds: map['elapsedSeconds'] as int? ?? 0),
       isPaused: map['isPaused'] as bool? ?? false,
+      isFinished: map['isFinished'] as bool? ?? false,
     );
   }
 }
