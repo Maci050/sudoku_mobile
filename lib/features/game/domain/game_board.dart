@@ -88,4 +88,65 @@ class GameBoard {
       isPaused: false,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'values': values
+          .map((row) => row.map((value) => value ?? 0).toList())
+          .toList(),
+      'fixedCells': fixedCells,
+      'solution': solution,
+      'difficulty': difficulty.name,
+      'selectedRow': selectedRow,
+      'selectedCol': selectedCol,
+      'notesMode': notesMode,
+      'notes': notes
+          .map((row) => row.map((cellNotes) => cellNotes.toList()).toList())
+          .toList(),
+      'elapsedSeconds': elapsed.inSeconds,
+      'isPaused': isPaused,
+    };
+  }
+
+  factory GameBoard.fromMap(Map<dynamic, dynamic> map) {
+    return GameBoard(
+      values: (map['values'] as List)
+          .map<List<int?>>(
+            (row) => (row as List)
+                .map<int?>((value) => value == 0 ? null : value as int)
+                .toList(),
+          )
+          .toList(),
+      fixedCells: (map['fixedCells'] as List)
+          .map<List<bool>>(
+            (row) => (row as List).map<bool>((value) => value as bool).toList(),
+          )
+          .toList(),
+      solution: (map['solution'] as List)
+          .map<List<int>>(
+            (row) => (row as List).map<int>((value) => value as int).toList(),
+          )
+          .toList(),
+      difficulty: Difficulty.values.firstWhere(
+        (d) => d.name == map['difficulty'],
+        orElse: () => Difficulty.easy,
+      ),
+      selectedRow: map['selectedRow'] as int?,
+      selectedCol: map['selectedCol'] as int?,
+      notesMode: map['notesMode'] as bool? ?? false,
+      notes: (map['notes'] as List)
+          .map<List<Set<int>>>(
+            (row) => (row as List)
+                .map<Set<int>>(
+                  (cellNotes) => (cellNotes as List)
+                      .map<int>((value) => value as int)
+                      .toSet(),
+                )
+                .toList(),
+          )
+          .toList(),
+      elapsed: Duration(seconds: map['elapsedSeconds'] as int? ?? 0),
+      isPaused: map['isPaused'] as bool? ?? false,
+    );
+  }
 }

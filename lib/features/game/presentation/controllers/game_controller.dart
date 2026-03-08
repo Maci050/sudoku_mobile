@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/game_storage.dart';
 import '../../data/sudoku_generator.dart';
 import '../../domain/difficulty.dart';
 import '../../domain/game_board.dart';
@@ -11,16 +12,35 @@ final gameControllerProvider =
 });
 
 class GameController extends StateNotifier<GameBoard> {
-  GameController() : super(SudokuGenerator().generate(Difficulty.easy)) {
-    _startTimer();
+  GameController() : super(GameBoard.empty()) {
+    _restoreOrCreateGame();
   }
 
   final SudokuGenerator _generator = SudokuGenerator();
+  final GameStorage _storage = GameStorage();
   Timer? _timer;
+
+  void _restoreOrCreateGame() {
+    final savedGame = _storage.loadGame();
+
+    if (savedGame != null) {
+      state = savedGame;
+    } else {
+      state = _generator.generate(Difficulty.easy);
+    }
+
+    _startTimer();
+    _saveGame();
+  }
+
+  Future<void> _saveGame() async {
+    await _storage.saveGame(state);
+  }
 
   void newGame(Difficulty difficulty) {
     state = _generator.generate(difficulty);
     _startTimer();
+    _saveGame();
   }
 
   void _startTimer() {
@@ -30,20 +50,24 @@ class GameController extends StateNotifier<GameBoard> {
         state = state.copyWith(
           elapsed: state.elapsed + const Duration(seconds: 1),
         );
+        _saveGame();
       }
     });
   }
 
   void pauseGame() {
     state = state.copyWith(isPaused: true);
+    _saveGame();
   }
 
   void resumeGame() {
     state = state.copyWith(isPaused: false);
+    _saveGame();
   }
 
   void togglePause() {
     state = state.copyWith(isPaused: !state.isPaused);
+    _saveGame();
   }
 
   void selectCell(int row, int col) {
@@ -53,6 +77,7 @@ class GameController extends StateNotifier<GameBoard> {
       selectedRow: row,
       selectedCol: col,
     );
+    _saveGame();
   }
 
   void toggleNotesMode() {
@@ -61,6 +86,7 @@ class GameController extends StateNotifier<GameBoard> {
     state = state.copyWith(
       notesMode: !state.notesMode,
     );
+    _saveGame();
   }
 
   void inputNumber(int number) {
@@ -84,6 +110,7 @@ class GameController extends StateNotifier<GameBoard> {
       }
 
       state = state.copyWith(notes: newNotes);
+      _saveGame();
       return;
     }
 
@@ -99,6 +126,7 @@ class GameController extends StateNotifier<GameBoard> {
       values: newValues,
       notes: newNotes,
     );
+    _saveGame();
   }
 
   void eraseSelectedCell() {
@@ -126,6 +154,7 @@ class GameController extends StateNotifier<GameBoard> {
       values: newValues,
       notes: newNotes,
     );
+    _saveGame();
   }
 
   bool isWrongValue(int row, int col) {
@@ -151,6 +180,10 @@ class GameController extends StateNotifier<GameBoard> {
     final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
     final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
+  }
+
+  Future<void> clearSavedGame() async {
+    await _storage.clearGame();
   }
 
   @override
