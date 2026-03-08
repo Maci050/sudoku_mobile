@@ -1,0 +1,4 @@
+enum GameEntryMode {
+  regular,
+  dailyChallenge,
+}

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../history/presentation/history_page.dart';
 import '../../domain/difficulty.dart';
 import '../controllers/game_controller.dart';
-import '../widgets/difficulty_selector.dart';
 import '../widgets/game_settings_sheet.dart';
 import '../widgets/game_toolbar.dart';
 import '../widgets/keypad.dart';
@@ -39,7 +37,7 @@ class _GamePageState extends ConsumerState<GamePage> {
       final controller = ref.read(gameControllerProvider.notifier);
 
       if (widget.startDailyChallenge) {
-        controller.startDailyChallenge();
+        controller.openDailyChallenge();
       } else if (widget.startDifficulty != null) {
         controller.newGame(widget.startDifficulty!);
       }
@@ -50,25 +48,11 @@ class _GamePageState extends ConsumerState<GamePage> {
   Widget build(BuildContext context) {
     final board = ref.watch(gameControllerProvider);
     final controller = ref.read(gameControllerProvider.notifier);
-    final dailyCompleted = controller.isTodayDailyChallengeCompleted();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(board.isDailyChallenge ? 'Desafío diario' : 'Sudoku'),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const HistoryPage(),
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: SafeArea(
         child: Stack(
@@ -94,41 +78,6 @@ class _GamePageState extends ConsumerState<GamePage> {
                       ),
                     ),
                   const SizedBox(height: 16),
-                  if (!board.isDailyChallenge)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        alignment: WrapAlignment.center,
-                        children: [
-                          FilledButton.tonalIcon(
-                            onPressed: () {
-                              ref.read(gameControllerProvider.notifier).startDailyChallenge();
-                            },
-                            icon: Icon(
-                              dailyCompleted
-                                  ? Icons.check_circle
-                                  : Icons.calendar_today,
-                            ),
-                            label: Text(
-                              dailyCompleted
-                                  ? 'Desafío diario completado'
-                                  : 'Jugar desafío diario',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  const SizedBox(height: 16),
-                  if (!board.isDailyChallenge)
-                    DifficultySelector(
-                      currentDifficulty: board.difficulty,
-                      onSelected: (difficulty) {
-                        ref.read(gameControllerProvider.notifier).newGame(difficulty);
-                      },
-                    ),
-                  const SizedBox(height: 16),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: SudokuGrid(),
@@ -137,7 +86,7 @@ class _GamePageState extends ConsumerState<GamePage> {
                   GameToolbar(
                     notesMode: board.notesMode,
                     onNewGame: () {
-                      ref.read(gameControllerProvider.notifier).newGame(board.difficulty);
+                      ref.read(gameControllerProvider.notifier).restartCurrentGame();
                     },
                     onToggleNotes: () {
                       ref.read(gameControllerProvider.notifier).toggleNotesMode();
@@ -183,8 +132,7 @@ class _GamePageState extends ConsumerState<GamePage> {
 
                         ref.read(gameControllerProvider.notifier).inputNumber(number);
 
-                        final updatedController =
-                            ref.read(gameControllerProvider.notifier);
+                        final updatedController = ref.read(gameControllerProvider.notifier);
                         final updatedBoard = ref.read(gameControllerProvider);
 
                         if (!wasFinished &&

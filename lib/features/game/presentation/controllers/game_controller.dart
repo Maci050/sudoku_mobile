@@ -47,21 +47,6 @@ class GameController extends StateNotifier<GameBoard> {
     _saveGame();
   }
 
-  void startDailyChallenge() {
-    final now = DateTime.now();
-    final challengeId = _buildChallengeId(now);
-    final seed = int.parse(challengeId);
-
-    state = SudokuGenerator(seed: seed).generate(
-      Difficulty.expert,
-      isDailyChallenge: true,
-      dailyChallengeId: challengeId,
-    );
-
-    _startTimer();
-    _saveGame();
-  }
-
   String _buildChallengeId(DateTime date) {
     final y = date.year.toString().padLeft(4, '0');
     final m = date.month.toString().padLeft(2, '0');
@@ -72,6 +57,58 @@ class GameController extends StateNotifier<GameBoard> {
   bool isTodayDailyChallengeCompleted() {
     final challengeId = _buildChallengeId(DateTime.now());
     return _dailyChallengeStorage.isCompletedFor(challengeId);
+  }
+
+  /// Devuelve true si abre/reanuda el desafío diario.
+  /// Devuelve false si el desafío de hoy ya está completado.
+  bool openDailyChallenge() {
+    final todayId = _buildChallengeId(DateTime.now());
+
+    if (_dailyChallengeStorage.isCompletedFor(todayId)) {
+      return false;
+    }
+
+    final savedGame = _storage.loadGame();
+
+    if (savedGame != null &&
+        savedGame.isDailyChallenge &&
+        savedGame.dailyChallengeId == todayId &&
+        !savedGame.isFinished) {
+      state = savedGame;
+      _startTimer();
+      _saveGame();
+      return true;
+    }
+
+    final seed = int.parse(todayId);
+
+    state = SudokuGenerator(seed: seed).generate(
+      Difficulty.expert,
+      isDailyChallenge: true,
+      dailyChallengeId: todayId,
+    );
+
+    _startTimer();
+    _saveGame();
+    return true;
+  }
+
+  void restartCurrentGame() {
+    if (state.isDailyChallenge && state.dailyChallengeId != null) {
+      final challengeId = state.dailyChallengeId!;
+      final seed = int.parse(challengeId);
+
+      state = SudokuGenerator(seed: seed).generate(
+        Difficulty.expert,
+        isDailyChallenge: true,
+        dailyChallengeId: challengeId,
+      );
+    } else {
+      state = SudokuGenerator().generate(state.difficulty);
+    }
+
+    _startTimer();
+    _saveGame();
   }
 
   void _startTimer() {
@@ -278,8 +315,8 @@ class GameController extends StateNotifier<GameBoard> {
     if (state.highlightRegions) {
       final sameRow = selectedRow == row;
       final sameCol = selectedCol == col;
-      final sameBox = (selectedRow ~/ 3 == row ~/ 3) &&
-          (selectedCol ~/ 3 == col ~/ 3);
+      final sameBox =
+          (selectedRow ~/ 3 == row ~/ 3) && (selectedCol ~/ 3 == col ~/ 3);
 
       if (sameRow || sameCol || sameBox) return true;
     }
