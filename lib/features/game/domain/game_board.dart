@@ -12,6 +12,8 @@ class GameBoard {
   final Duration elapsed;
   final bool isPaused;
   final bool isFinished;
+  final bool isDailyChallenge;
+  final String? dailyChallengeId;
 
   const GameBoard({
     required this.values,
@@ -22,6 +24,8 @@ class GameBoard {
     required this.elapsed,
     required this.isPaused,
     required this.isFinished,
+    required this.isDailyChallenge,
+    required this.dailyChallengeId,
     this.selectedRow,
     this.selectedCol,
     this.notesMode = false,
@@ -36,6 +40,8 @@ class GameBoard {
     Duration? elapsed,
     bool? isPaused,
     bool? isFinished,
+    bool? isDailyChallenge,
+    String? dailyChallengeId,
     int? selectedRow,
     int? selectedCol,
     bool? notesMode,
@@ -49,6 +55,8 @@ class GameBoard {
       elapsed: elapsed ?? this.elapsed,
       isPaused: isPaused ?? this.isPaused,
       isFinished: isFinished ?? this.isFinished,
+      isDailyChallenge: isDailyChallenge ?? this.isDailyChallenge,
+      dailyChallengeId: dailyChallengeId ?? this.dailyChallengeId,
       selectedRow: selectedRow ?? this.selectedRow,
       selectedCol: selectedCol ?? this.selectedCol,
       notesMode: notesMode ?? this.notesMode,
@@ -59,6 +67,8 @@ class GameBoard {
     required List<List<int>> puzzle,
     required List<List<int>> solution,
     required Difficulty difficulty,
+    bool isDailyChallenge = false,
+    String? dailyChallengeId,
   }) {
     return GameBoard(
       values: puzzle
@@ -76,6 +86,8 @@ class GameBoard {
       elapsed: Duration.zero,
       isPaused: false,
       isFinished: false,
+      isDailyChallenge: isDailyChallenge,
+      dailyChallengeId: dailyChallengeId,
     );
   }
 
@@ -92,6 +104,8 @@ class GameBoard {
       elapsed: Duration.zero,
       isPaused: false,
       isFinished: false,
+      isDailyChallenge: false,
+      dailyChallengeId: null,
     );
   }
 
@@ -112,6 +126,8 @@ class GameBoard {
       'elapsedSeconds': elapsed.inSeconds,
       'isPaused': isPaused,
       'isFinished': isFinished,
+      'isDailyChallenge': isDailyChallenge,
+      'dailyChallengeId': dailyChallengeId,
     };
   }
 
@@ -155,6 +171,8 @@ class GameBoard {
       elapsed: Duration(seconds: map['elapsedSeconds'] as int? ?? 0),
       isPaused: map['isPaused'] as bool? ?? false,
       isFinished: map['isFinished'] as bool? ?? false,
+      isDailyChallenge: map['isDailyChallenge'] as bool? ?? false,
+      dailyChallengeId: map['dailyChallengeId'] as String?,
     );
   }
 }

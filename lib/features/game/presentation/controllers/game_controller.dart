@@ -7,6 +7,7 @@ import '../../domain/difficulty.dart';
 import '../../domain/game_board.dart';
 import '../../../history/data/history_storage.dart';
 import '../../../history/domain/completed_game.dart';
+import '../../../daily_challenge/data/daily_challenge_storage.dart';
 
 final gameControllerProvider =
     StateNotifierProvider<GameController, GameBoard>((ref) {
@@ -18,9 +19,9 @@ class GameController extends StateNotifier<GameBoard> {
     _restoreOrCreateGame();
   }
 
-  final SudokuGenerator _generator = SudokuGenerator();
   final GameStorage _storage = GameStorage();
   final HistoryStorage _historyStorage = HistoryStorage();
+  final DailyChallengeStorage _dailyChallengeStorage = DailyChallengeStorage();
   Timer? _timer;
 
   void _restoreOrCreateGame() {
@@ -29,7 +30,7 @@ class GameController extends StateNotifier<GameBoard> {
     if (savedGame != null) {
       state = savedGame;
     } else {
-      state = _generator.generate(Difficulty.easy);
+      state = SudokuGenerator().generate(Difficulty.easy);
     }
 
     _startTimer();
@@ -41,9 +42,36 @@ class GameController extends StateNotifier<GameBoard> {
   }
 
   void newGame(Difficulty difficulty) {
-    state = _generator.generate(difficulty);
+    state = SudokuGenerator().generate(difficulty);
     _startTimer();
     _saveGame();
+  }
+
+  void startDailyChallenge() {
+    final now = DateTime.now();
+    final challengeId = _buildChallengeId(now);
+    final seed = int.parse(challengeId);
+
+    state = SudokuGenerator(seed: seed).generate(
+      Difficulty.expert,
+      isDailyChallenge: true,
+      dailyChallengeId: challengeId,
+    );
+
+    _startTimer();
+    _saveGame();
+  }
+
+  String _buildChallengeId(DateTime date) {
+    final y = date.year.toString().padLeft(4, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
+    return '$y$m$d';
+  }
+
+  bool isTodayDailyChallengeCompleted() {
+    final challengeId = _buildChallengeId(DateTime.now());
+    return _dailyChallengeStorage.isCompletedFor(challengeId);
   }
 
   void _startTimer() {
@@ -192,6 +220,10 @@ class GameController extends StateNotifier<GameBoard> {
         completedAt: DateTime.now(),
       ),
     );
+
+    if (state.isDailyChallenge && state.dailyChallengeId != null) {
+      _dailyChallengeStorage.markCompleted(state.dailyChallengeId!);
+    }
 
     state = state.copyWith(
       isFinished: true,

@@ -3,9 +3,15 @@ import '../domain/difficulty.dart';
 import '../domain/game_board.dart';
 
 class SudokuGenerator {
-  final Random _random = Random();
+  final Random _random;
 
-  GameBoard generate(Difficulty difficulty) {
+  SudokuGenerator({int? seed}) : _random = Random(seed);
+
+  GameBoard generate(
+    Difficulty difficulty, {
+    bool isDailyChallenge = false,
+    String? dailyChallengeId,
+  }) {
     final solution = List.generate(9, (_) => List.filled(9, 0));
     _fillBoard(solution);
 
@@ -16,6 +22,8 @@ class SudokuGenerator {
       puzzle: puzzle,
       solution: solution,
       difficulty: difficulty,
+      isDailyChallenge: isDailyChallenge,
+      dailyChallengeId: dailyChallengeId,
     );
   }
 

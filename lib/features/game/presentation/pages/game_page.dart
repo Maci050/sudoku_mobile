@@ -7,7 +7,6 @@ import '../widgets/game_toolbar.dart';
 import '../widgets/keypad.dart';
 import '../widgets/sudoku_grid.dart';
 import '../widgets/timer_bar.dart';
-import '../../domain/difficulty.dart';
 
 class GamePage extends ConsumerWidget {
   const GamePage({super.key});
@@ -16,6 +15,7 @@ class GamePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final board = ref.watch(gameControllerProvider);
     final controller = ref.read(gameControllerProvider.notifier);
+    final dailyCompleted = controller.isTodayDailyChallengeCompleted();
 
     return Scaffold(
       appBar: AppBar(
@@ -50,6 +50,30 @@ class GamePage extends ConsumerWidget {
                     },
                   ),
                   const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        FilledButton.tonalIcon(
+                          onPressed: () {
+                            ref.read(gameControllerProvider.notifier).startDailyChallenge();
+                          },
+                          icon: Icon(
+                            dailyCompleted ? Icons.check_circle : Icons.calendar_today,
+                          ),
+                          label: Text(
+                            dailyCompleted
+                                ? 'Desafío diario completado'
+                                : 'Jugar desafío diario',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   DifficultySelector(
                     currentDifficulty: board.difficulty,
                     onSelected: (difficulty) {
@@ -82,17 +106,13 @@ class GamePage extends ConsumerWidget {
                         ref.read(gameControllerProvider.notifier).inputNumber(number);
 
                         if (controller.checkAndHandleCompletion()) {
-                          showDialog(
-                            context: context,
-                            builder: (_) => AlertDialog(
-                              title: const Text('¡Sudoku completado!'),
-                              content: Text('Has completado el Sudoku ${board.difficulty.label} en ${controller.formattedElapsed()}'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Cerrar'),
-                                ),
-                              ],
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                board.isDailyChallenge
+                                    ? '¡Desafío diario completado!'
+                                    : '¡Sudoku completado!',
+                              ),
                             ),
                           );
                         }
