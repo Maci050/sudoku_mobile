@@ -98,27 +98,7 @@ class _GamePageState extends ConsumerState<GamePage> {
                       showModalBottomSheet(
                         context: context,
                         showDragHandle: true,
-                        builder: (_) => GameSettingsSheet(
-                          board: board,
-                          onToggleLimitMistakes: (value) {
-                            ref.read(gameControllerProvider.notifier).toggleLimitMistakes(value);
-                          },
-                          onToggleHighlightErrors: (value) {
-                            ref.read(gameControllerProvider.notifier).toggleHighlightErrors(value);
-                          },
-                          onToggleHighlightDuplicates: (value) {
-                            ref.read(gameControllerProvider.notifier).toggleHighlightDuplicates(value);
-                          },
-                          onToggleHideUsedNumbers: (value) {
-                            ref.read(gameControllerProvider.notifier).toggleHideUsedNumbers(value);
-                          },
-                          onToggleHighlightRegions: (value) {
-                            ref.read(gameControllerProvider.notifier).toggleHighlightRegions(value);
-                          },
-                          onToggleHighlightSameNumbers: (value) {
-                            ref.read(gameControllerProvider.notifier).toggleHighlightSameNumbers(value);
-                          },
-                        ),
+                        builder: (_) => const GameSettingsSheet(),
                       );
                     },
                   ),

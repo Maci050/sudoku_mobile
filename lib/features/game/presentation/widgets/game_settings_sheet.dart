@@ -1,28 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../domain/game_board.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../controllers/game_controller.dart';
 
-class GameSettingsSheet extends StatelessWidget {
-  final GameBoard board;
-  final ValueChanged<bool> onToggleLimitMistakes;
-  final ValueChanged<bool> onToggleHighlightErrors;
-  final ValueChanged<bool> onToggleHighlightDuplicates;
-  final ValueChanged<bool> onToggleHideUsedNumbers;
-  final ValueChanged<bool> onToggleHighlightRegions;
-  final ValueChanged<bool> onToggleHighlightSameNumbers;
-
-  const GameSettingsSheet({
-    super.key,
-    required this.board,
-    required this.onToggleLimitMistakes,
-    required this.onToggleHighlightErrors,
-    required this.onToggleHighlightDuplicates,
-    required this.onToggleHideUsedNumbers,
-    required this.onToggleHighlightRegions,
-    required this.onToggleHighlightSameNumbers,
-  });
+class GameSettingsSheet extends ConsumerWidget {
+  const GameSettingsSheet({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final board = ref.watch(gameControllerProvider);
+    final controller = ref.read(gameControllerProvider.notifier);
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -31,39 +18,42 @@ class GameSettingsSheet extends StatelessWidget {
           children: [
             const Text(
               'Ayudas y reglas',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 12),
             SwitchListTile(
               title: const Text('Límite de errores'),
               subtitle: Text('Pierdes al llegar a ${board.maxMistakes} errores'),
               value: board.limitMistakesEnabled,
-              onChanged: onToggleLimitMistakes,
+              onChanged: controller.toggleLimitMistakes,
             ),
             SwitchListTile(
               title: const Text('Resaltar errores'),
               value: board.highlightErrors,
-              onChanged: onToggleHighlightErrors,
+              onChanged: controller.toggleHighlightErrors,
             ),
             SwitchListTile(
               title: const Text('Resaltar duplicados'),
               value: board.highlightDuplicates,
-              onChanged: onToggleHighlightDuplicates,
+              onChanged: controller.toggleHighlightDuplicates,
             ),
             SwitchListTile(
               title: const Text('Ocultar números usados'),
               value: board.hideUsedNumbers,
-              onChanged: onToggleHideUsedNumbers,
+              onChanged: controller.toggleHideUsedNumbers,
             ),
             SwitchListTile(
               title: const Text('Resaltar fila, columna y bloque'),
               value: board.highlightRegions,
-              onChanged: onToggleHighlightRegions,
+              onChanged: controller.toggleHighlightRegions,
             ),
             SwitchListTile(
               title: const Text('Resaltar números iguales'),
               value: board.highlightSameNumbers,
-              onChanged: onToggleHighlightSameNumbers,
+              onChanged: controller.toggleHighlightSameNumbers,
             ),
           ],
         ),
