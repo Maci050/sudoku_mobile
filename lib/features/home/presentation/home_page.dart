@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../game/domain/difficulty.dart';
-import '../../game/presentation/controllers/game_controller.dart';
 import '../../game/presentation/pages/game_page.dart';
 import '../../history/presentation/history_page.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   void _openContinueGame(BuildContext context) {
@@ -25,19 +23,7 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  void _openDailyChallenge(BuildContext context, WidgetRef ref) {
-    final controller = ref.read(gameControllerProvider.notifier);
-    final opened = controller.openDailyChallenge();
-
-    if (!opened) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Ya has completado el desafío diario de hoy.'),
-        ),
-      );
-      return;
-    }
-
+  void _openDailyChallenge(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -57,24 +43,8 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  String _formatContinueSubtitle({
-    required Duration elapsed,
-    required String mode,
-  }) {
-    final minutes = elapsed.inMinutes.toString().padLeft(2, '0');
-    final seconds = (elapsed.inSeconds % 60).toString().padLeft(2, '0');
-    return '$minutes:$seconds • $mode';
-  }
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final board = ref.watch(gameControllerProvider);
-    final dailyCompleted =
-        ref.read(gameControllerProvider.notifier).isTodayDailyChallengeCompleted();
-
-    final modeLabel =
-        board.isDailyChallenge ? 'Desafío diario' : board.difficulty.label;
-
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sudoku'),
@@ -88,10 +58,7 @@ class HomePage extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: _HomeActionButton(
                 title: 'Continuar la partida',
-                subtitle: _formatContinueSubtitle(
-                  elapsed: board.elapsed,
-                  mode: modeLabel,
-                ),
+                subtitle: 'Retoma tu última partida guardada',
                 filled: true,
                 icon: Icons.play_arrow,
                 onTap: () => _openContinueGame(context),
@@ -109,10 +76,31 @@ class HomePage extends ConsumerWidget {
             const SizedBox(height: 24),
             const Divider(height: 1),
             Expanded(
-              child: Center(
-                child: Text(
-                  'Selecciona cómo quieres jugar',
-                  style: Theme.of(context).textTheme.titleMedium,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: const [
+                    _InfoCard(
+                      title: 'Consejo rápido',
+                      icon: Icons.lightbulb_outline,
+                      text:
+                          'Empieza por filas, columnas o bloques que ya tengan muchos números colocados.',
+                    ),
+                    SizedBox(height: 16),
+                    _InfoCard(
+                      title: 'Modo notas',
+                      icon: Icons.edit_note,
+                      text:
+                          'Usa las notas para marcar posibilidades antes de colocar un número definitivo.',
+                    ),
+                    SizedBox(height: 16),
+                    _InfoCard(
+                      title: 'Desafío diario',
+                      icon: Icons.calendar_today,
+                      text:
+                          'Cada día puedes enfrentarte a un Sudoku único y mantener tu constancia.',
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -123,15 +111,7 @@ class HomePage extends ConsumerWidget {
         selectedIndex: 0,
         onDestinationSelected: (index) {
           if (index == 1) {
-            if (dailyCompleted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Ya has completado el desafío diario de hoy.'),
-                ),
-              );
-              return;
-            }
-            _openDailyChallenge(context, ref);
+            _openDailyChallenge(context);
           } else if (index == 2) {
             _openHistory(context);
           }
@@ -228,11 +208,55 @@ class _HomeActionButton extends StatelessWidget {
   }
 }
 
-class _NewGameDifficultySheet extends ConsumerWidget {
+class _InfoCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final String text;
+
+  const _InfoCard({
+    required this.title,
+    required this.icon,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(text),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NewGameDifficultySheet extends StatelessWidget {
   const _NewGameDifficultySheet();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),

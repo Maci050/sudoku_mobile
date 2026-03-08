@@ -12,12 +12,17 @@ class GameStorage {
   }
 
   GameBoard? loadGame() {
-    final data = _box.get(_activeGameKey);
+    try {
+      final data = _box.get(_activeGameKey);
 
-    if (data == null) return null;
-    if (data is! Map) return null;
+      if (data == null) return null;
+      if (data is! Map) return null;
 
-    return GameBoard.fromMap(data);
+      return GameBoard.fromMap(data);
+    } catch (_) {
+      _box.delete(_activeGameKey);
+      return null;
+    }
   }
 
   Future<void> clearGame() async {

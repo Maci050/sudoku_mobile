@@ -15,26 +15,29 @@ final gameControllerProvider =
 });
 
 class GameController extends StateNotifier<GameBoard> {
-  GameController() : super(GameBoard.empty()) {
-    _restoreOrCreateGame();
-  }
+  GameController() : super(GameBoard.empty());
 
   final GameStorage _storage = GameStorage();
   final HistoryStorage _historyStorage = HistoryStorage();
   final DailyChallengeStorage _dailyChallengeStorage = DailyChallengeStorage();
   Timer? _timer;
 
-  void _restoreOrCreateGame() {
+  bool _initialized = false;
+
+  void ensureInitialized() {
+    if (_initialized) return;
+    _initialized = true;
+
     final savedGame = _storage.loadGame();
 
     if (savedGame != null) {
       state = savedGame;
     } else {
       state = SudokuGenerator().generate(Difficulty.easy);
+      _saveGame();
     }
 
     _startTimer();
-    _saveGame();
   }
 
   Future<void> _saveGame() async {
@@ -42,6 +45,7 @@ class GameController extends StateNotifier<GameBoard> {
   }
 
   void newGame(Difficulty difficulty) {
+    ensureInitialized();
     state = SudokuGenerator().generate(difficulty);
     _startTimer();
     _saveGame();
@@ -59,9 +63,9 @@ class GameController extends StateNotifier<GameBoard> {
     return _dailyChallengeStorage.isCompletedFor(challengeId);
   }
 
-  /// Devuelve true si abre/reanuda el desafío diario.
-  /// Devuelve false si el desafío de hoy ya está completado.
   bool openDailyChallenge() {
+    ensureInitialized();
+
     final todayId = _buildChallengeId(DateTime.now());
 
     if (_dailyChallengeStorage.isCompletedFor(todayId)) {
@@ -94,6 +98,8 @@ class GameController extends StateNotifier<GameBoard> {
   }
 
   void restartCurrentGame() {
+    ensureInitialized();
+
     if (state.isDailyChallenge && state.dailyChallengeId != null) {
       final challengeId = state.dailyChallengeId!;
       final seed = int.parse(challengeId);
