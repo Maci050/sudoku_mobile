@@ -1,11 +1,20 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import '../../daily_challenge/presentation/daily_challenge_page.dart';
 import '../../game/domain/difficulty.dart';
 import '../../game/presentation/pages/game_page.dart';
 import '../../history/presentation/history_page.dart';
-import '../../daily_challenge/presentation/daily_challenge_page.dart';
+import '../../tips/data/sudoku_tips.dart';
+import '../../tips/domain/sudoku_tip.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
+
+  SudokuTip _randomTip() {
+    final random = Random();
+    return sudokuTips[random.nextInt(sudokuTips.length)];
+  }
 
   void _openContinueGame(BuildContext context) {
     Navigator.push(
@@ -29,7 +38,7 @@ class HomePage extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (_) => const DailyChallengesPage(),
-        ),
+      ),
     );
   }
 
@@ -44,6 +53,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tip = _randomTip();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sudoku'),
@@ -78,26 +89,12 @@ class HomePage extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: Column(
-                  children: const [
+                  children: [
                     _InfoCard(
-                      title: 'Consejo rápido',
+                      title: tip.title,
                       icon: Icons.lightbulb_outline,
-                      text:
-                          'Empieza por filas, columnas o bloques que ya tengan muchos números colocados.',
-                    ),
-                    SizedBox(height: 16),
-                    _InfoCard(
-                      title: 'Modo notas',
-                      icon: Icons.edit_note,
-                      text:
-                          'Usa las notas para marcar posibilidades antes de colocar un número definitivo.',
-                    ),
-                    SizedBox(height: 16),
-                    _InfoCard(
-                      title: 'Desafío diario',
-                      icon: Icons.calendar_today,
-                      text:
-                          'Cada día puedes enfrentarte a un Sudoku único y mantener tu constancia.',
+                      text: tip.text,
+                      image: tip.assetImage,
                     ),
                   ],
                 ),
@@ -211,11 +208,13 @@ class _InfoCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final String text;
+  final String? image;
 
   const _InfoCard({
     required this.title,
     required this.icon,
     required this.text,
+    this.image,
   });
 
   @override
@@ -241,6 +240,13 @@ class _InfoCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(text),
+                  if (image != null) ...[
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(image!),
+                    ),
+                  ],
                 ],
               ),
             ),
