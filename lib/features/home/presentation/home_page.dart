@@ -5,7 +5,7 @@ import '../../daily_challenge/presentation/daily_challenge_page.dart';
 import '../../game/domain/difficulty.dart';
 import '../../game/presentation/pages/game_page.dart';
 import '../../history/presentation/history_page.dart';
-import '../../tips/data/sudoku_tips.dart';
+import '../../tips/data/sudoku_tip.dart';
 import '../../tips/domain/sudoku_tip.dart';
 
 class HomePage extends StatelessWidget {
@@ -94,7 +94,7 @@ class HomePage extends StatelessWidget {
                       title: tip.title,
                       icon: Icons.lightbulb_outline,
                       text: tip.text,
-                      image: tip.assetImage,
+                      images: tip.assetImages,
                     ),
                   ],
                 ),
@@ -170,7 +170,8 @@ class _HomeActionButton extends StatelessWidget {
                   if (icon != null) ...[
                     Icon(
                       icon,
-                      color: filled ? colorScheme.onPrimary : colorScheme.onSurface,
+                      color:
+                          filled ? colorScheme.onPrimary : colorScheme.onSurface,
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -179,7 +180,8 @@ class _HomeActionButton extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: filled ? colorScheme.onPrimary : colorScheme.primary,
+                      color:
+                          filled ? colorScheme.onPrimary : colorScheme.primary,
                     ),
                   ),
                 ],
@@ -204,52 +206,104 @@ class _HomeActionButton extends StatelessWidget {
   }
 }
 
-class _InfoCard extends StatelessWidget {
+class _InfoCard extends StatefulWidget {
   final String title;
   final IconData icon;
   final String text;
-  final String? image;
+  final List<String> images;
 
   const _InfoCard({
     required this.title,
     required this.icon,
     required this.text,
-    this.image,
+    this.images = const [],
   });
 
   @override
+  State<_InfoCard> createState() => _InfoCardState();
+}
+
+class _InfoCardState extends State<_InfoCard> {
+  int currentImageIndex = 0;
+
+  void _previousImage() {
+    if (currentImageIndex > 0) {
+      setState(() {
+        currentImageIndex--;
+      });
+    }
+  }
+
+  void _nextImage() {
+    if (currentImageIndex < widget.images.length - 1) {
+      setState(() {
+        currentImageIndex++;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final hasImages = widget.images.isNotEmpty;
+    final hasMultipleImages = widget.images.length > 1;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
+            Row(
+              children: [
+                Icon(widget.icon),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    widget.title,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(text),
-                  if (image != null) ...[
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(image!),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(widget.text),
+            if (hasImages) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  widget.images[currentImageIndex],
+                  fit: BoxFit.contain,
+                ),
+              ),
+              if (hasMultipleImages) ...[
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: currentImageIndex > 0 ? _previousImage : null,
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text('Anterior'),
+                    ),
+                    Text(
+                      '${currentImageIndex + 1}/${widget.images.length}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: currentImageIndex < widget.images.length - 1
+                          ? _nextImage
+                          : null,
+                      icon: const Icon(Icons.arrow_forward),
+                      label: const Text('Siguiente'),
                     ),
                   ],
-                ],
-              ),
-            ),
+                ),
+              ],
+            ],
           ],
         ),
       ),
