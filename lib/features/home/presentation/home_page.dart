@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../game/domain/difficulty.dart';
 import '../../game/presentation/pages/game_page.dart';
 import '../../history/presentation/history_page.dart';
+import '../../daily_challenge/presentation/daily_challenge_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -27,10 +28,8 @@ class HomePage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const GamePage(
-          startDailyChallenge: true,
+        builder: (_) => const DailyChallengesPage(),
         ),
-      ),
     );
   }
 

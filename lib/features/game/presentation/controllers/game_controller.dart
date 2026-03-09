@@ -63,38 +63,14 @@ class GameController extends StateNotifier<GameBoard> {
     return _dailyChallengeStorage.isCompletedFor(challengeId);
   }
 
-  bool openDailyChallenge() {
-    ensureInitialized();
+    bool openDailyChallenge() {
+    final today = DateTime.now();
 
-    final todayId = _buildChallengeId(DateTime.now());
-
-    if (_dailyChallengeStorage.isCompletedFor(todayId)) {
+    if (isDailyChallengeCompletedForDate(today)) {
       return false;
     }
 
-    final savedGame = _storage.loadGame();
-
-    if (savedGame != null &&
-        savedGame.isDailyChallenge &&
-        savedGame.dailyChallengeId == todayId &&
-        !savedGame.isFinished) {
-      state = savedGame;
-      _startTimer();
-      _saveGame();
-      return true;
-    }
-
-    final seed = int.parse(todayId);
-
-    state = SudokuGenerator(seed: seed).generate(
-      Difficulty.expert,
-      isDailyChallenge: true,
-      dailyChallengeId: todayId,
-    );
-
-    _startTimer();
-    _saveGame();
-    return true;
+    return openDailyChallengeForDate(today);
   }
 
   void restartCurrentGame() {
@@ -393,6 +369,41 @@ class GameController extends StateNotifier<GameBoard> {
     _saveGame();
 
     return true;
+  }
+
+  bool openDailyChallengeForDate(DateTime date) {
+  ensureInitialized();
+
+    final challengeId = _buildChallengeId(date);
+
+    final savedGame = _storage.loadGame();
+
+    if (savedGame != null &&
+        savedGame.isDailyChallenge &&
+        savedGame.dailyChallengeId == challengeId &&
+        !savedGame.isFinished) {
+      state = savedGame;
+      _startTimer();
+      _saveGame();
+      return true;
+    }
+
+    final seed = int.parse(challengeId);
+
+    state = SudokuGenerator(seed: seed).generate(
+      Difficulty.expert,
+      isDailyChallenge: true,
+      dailyChallengeId: challengeId,
+    );
+
+    _startTimer();
+    _saveGame();
+    return true;
+  }
+
+  bool isDailyChallengeCompletedForDate(DateTime date) {
+    final challengeId = _buildChallengeId(date);
+    return _dailyChallengeStorage.isCompletedFor(challengeId);
   }
 
   String formattedElapsed() {

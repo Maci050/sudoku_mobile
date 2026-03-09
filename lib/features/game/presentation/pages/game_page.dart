@@ -36,9 +36,9 @@ class _GamePageState extends ConsumerState<GamePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final controller = ref.read(gameControllerProvider.notifier);
 
-      if (widget.startDailyChallenge) {
-        controller.openDailyChallenge();
-      } else if (widget.startDifficulty != null) {
+      controller.ensureInitialized();
+
+      if (!widget.startDailyChallenge && widget.startDifficulty != null) {
         controller.newGame(widget.startDifficulty!);
       }
     });
