@@ -24,6 +24,39 @@ class GameController extends StateNotifier<GameBoard> {
 
   bool _initialized = false;
 
+  void surrenderGame() {
+    if (state.isFinished) return;
+
+    final solvedValues = state.solution
+        .map<List<int?>>((row) => row.map<int?>((value) => value).toList())
+        .toList();
+
+    final clearedNotes = List.generate(
+      9,
+      (_) => List.generate(9, (_) => <int>{}),
+    );
+
+    _historyStorage.addGame(
+      CompletedGame(
+        difficulty: state.difficulty,
+        time: state.elapsed,
+        completedAt: DateTime.now(),
+        status: GameResultStatus.surrendered,
+      ),
+    );
+
+    state = state.copyWith(
+      values: solvedValues,
+      notes: clearedNotes,
+      isFinished: true,
+      isPaused: false,
+      isSurrendered: true,
+      selectedRow: null,
+      selectedCol: null,
+    );
+    _saveGame();
+  }
+
   void ensureInitialized() {
     if (_initialized) return;
     _initialized = true;
@@ -75,6 +108,10 @@ class GameController extends StateNotifier<GameBoard> {
 
   void restartCurrentGame() {
     ensureInitialized();
+
+    if (state.isSurrendered) {
+      return;
+    }
 
     if (state.isDailyChallenge && state.dailyChallengeId != null) {
       final challengeId = state.dailyChallengeId!;
@@ -355,6 +392,7 @@ class GameController extends StateNotifier<GameBoard> {
         difficulty: state.difficulty,
         time: state.elapsed,
         completedAt: DateTime.now(),
+        status: GameResultStatus.completed,
       ),
     );
 

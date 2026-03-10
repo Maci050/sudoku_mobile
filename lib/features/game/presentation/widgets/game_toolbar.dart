@@ -6,6 +6,7 @@ class GameToolbar extends StatelessWidget {
   final VoidCallback onToggleNotes;
   final VoidCallback onErase;
   final VoidCallback onOpenSettings;
+  final VoidCallback onSurrender;
 
   const GameToolbar({
     super.key,
@@ -14,6 +15,7 @@ class GameToolbar extends StatelessWidget {
     required this.onToggleNotes,
     required this.onErase,
     required this.onOpenSettings,
+    required this.onSurrender,
   });
 
   @override
@@ -25,6 +27,11 @@ class GameToolbar extends StatelessWidget {
           icon: Icons.refresh_rounded,
           label: 'Nuevo',
           onTap: onNewGame,
+        ),
+        _ToolButton(
+          icon: Icons.flag_outlined,
+          label: 'Rendirse',
+          onTap: onSurrender,
         ),
         _ToolButton(
           icon: Icons.backspace_outlined,

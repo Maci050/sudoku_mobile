@@ -54,6 +54,32 @@ class _GamePageState extends ConsumerState<GamePage> {
     return count;
   }
 
+  Future<void> _confirmSurrender(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('¿Quieres rendirte?'),
+        content: const Text(
+          'Se mostrará la solución completa y esta partida quedará marcada como rendida. No podrás volver a intentarla.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Rendirme'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      ref.read(gameControllerProvider.notifier).surrenderGame();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final board = ref.watch(gameControllerProvider);
@@ -112,6 +138,8 @@ class _GamePageState extends ConsumerState<GamePage> {
                     ),
                   ),
                   const SizedBox(height: 12),
+
+                  /// TABLERO
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -123,78 +151,135 @@ class _GamePageState extends ConsumerState<GamePage> {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: GameToolbar(
-                      notesMode: board.notesMode,
-                      onNewGame: () {
-                        ref.read(gameControllerProvider.notifier).restartCurrentGame();
-                      },
-                      onToggleNotes: () {
-                        ref.read(gameControllerProvider.notifier).toggleNotesMode();
-                      },
-                      onErase: () {
-                        ref.read(gameControllerProvider.notifier).eraseSelectedCell();
-                      },
-                      onOpenSettings: () {
-                        showModalBottomSheet(
-                          context: context,
-                          showDragHandle: true,
-                          builder: (_) => const GameSettingsSheet(),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                    child: Keypad(
-                      disabledNumbers: controller.usedUpNumbers(),
-                      onPressed: (number) {
-                        final wasFinished = board.isFinished;
 
-                        ref.read(gameControllerProvider.notifier).inputNumber(number);
+                  /// SI NO ESTÁ RENDIDO → MOSTRAR CONTROLES
+                  if (!board.isSurrendered) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: GameToolbar(
+                        notesMode: board.notesMode,
+                        onNewGame: () {
+                          ref.read(gameControllerProvider.notifier).restartCurrentGame();
 
-                        final updatedController =
-                            ref.read(gameControllerProvider.notifier);
-                        final updatedBoard = ref.read(gameControllerProvider);
-
-                        if (!wasFinished &&
-                            updatedController.checkAndHandleCompletion()) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => GameResultPage(
-                                won: true,
-                                isDailyChallenge: updatedBoard.isDailyChallenge,
-                                difficulty: updatedBoard.difficulty,
-                                elapsed: updatedBoard.elapsed,
-                                mistakes: updatedBoard.mistakes,
+                          if (board.isSurrendered) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Esta partida quedó rendida. Empieza una nueva desde el inicio.',
+                                ),
                               ),
-                            ),
+                            );
+                          }
+                        },
+                        onSurrender: () {
+                          _confirmSurrender(context);
+                        },
+                        onToggleNotes: () {
+                          ref.read(gameControllerProvider.notifier).toggleNotesMode();
+                        },
+                        onErase: () {
+                          ref.read(gameControllerProvider.notifier).eraseSelectedCell();
+                        },
+                        onOpenSettings: () {
+                          showModalBottomSheet(
+                            context: context,
+                            showDragHandle: true,
+                            builder: (_) => const GameSettingsSheet(),
                           );
-                        } else if (updatedBoard.limitMistakesEnabled &&
-                            updatedBoard.mistakes >= updatedBoard.maxMistakes &&
-                            updatedBoard.isFinished) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => GameResultPage(
-                                won: false,
-                                isDailyChallenge: updatedBoard.isDailyChallenge,
-                                difficulty: updatedBoard.difficulty,
-                                elapsed: updatedBoard.elapsed,
-                                mistakes: updatedBoard.mistakes,
-                              ),
-                            ),
-                          );
-                        }
-                      },
+                        },
+                      ),
                     ),
-                  ),
+
+                    const SizedBox(height: 14),
+
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                      child: Keypad(
+                        disabledNumbers: controller.usedUpNumbers(),
+                        onPressed: (number) {
+                          final wasFinished = board.isFinished;
+
+                          ref.read(gameControllerProvider.notifier).inputNumber(number);
+
+                          final updatedController =
+                              ref.read(gameControllerProvider.notifier);
+                          final updatedBoard = ref.read(gameControllerProvider);
+
+                          if (!wasFinished &&
+                              updatedController.checkAndHandleCompletion()) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => GameResultPage(
+                                  won: true,
+                                  isDailyChallenge: updatedBoard.isDailyChallenge,
+                                  difficulty: updatedBoard.difficulty,
+                                  elapsed: updatedBoard.elapsed,
+                                  mistakes: updatedBoard.mistakes,
+                                ),
+                              ),
+                            );
+                          } else if (updatedBoard.limitMistakesEnabled &&
+                              updatedBoard.mistakes >= updatedBoard.maxMistakes &&
+                              updatedBoard.isFinished) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => GameResultPage(
+                                  won: false,
+                                  isDailyChallenge: updatedBoard.isDailyChallenge,
+                                  difficulty: updatedBoard.difficulty,
+                                  elapsed: updatedBoard.elapsed,
+                                  mistakes: updatedBoard.mistakes,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ]
+
+                  /// SI ESTÁ RENDIDO → MENSAJE
+                  else ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Te has rendido',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Se muestra la solución completa de este Sudoku. Esta partida ha quedado registrada como rendida.',
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 12),
+                              FilledButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Volver'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
+
+              /// PAUSA
               if (board.isPaused)
                 Positioned.fill(
                   child: Container(

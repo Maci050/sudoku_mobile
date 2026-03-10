@@ -14,6 +14,7 @@ class GameBoard {
   final bool isFinished;
   final bool isDailyChallenge;
   final String? dailyChallengeId;
+  final bool isSurrendered;
 
   final bool limitMistakesEnabled;
   final int mistakes;
@@ -35,6 +36,7 @@ class GameBoard {
     required this.isFinished,
     required this.isDailyChallenge,
     required this.dailyChallengeId,
+    required this.isSurrendered,
     required this.limitMistakesEnabled,
     required this.mistakes,
     required this.maxMistakes,
@@ -59,6 +61,7 @@ class GameBoard {
     bool? isFinished,
     bool? isDailyChallenge,
     String? dailyChallengeId,
+    bool? isSurrendered,
     bool? limitMistakesEnabled,
     int? mistakes,
     int? maxMistakes,
@@ -82,6 +85,7 @@ class GameBoard {
       isFinished: isFinished ?? this.isFinished,
       isDailyChallenge: isDailyChallenge ?? this.isDailyChallenge,
       dailyChallengeId: dailyChallengeId ?? this.dailyChallengeId,
+      isSurrendered: isSurrendered ?? this.isSurrendered,
       limitMistakesEnabled: limitMistakesEnabled ?? this.limitMistakesEnabled,
       mistakes: mistakes ?? this.mistakes,
       maxMistakes: maxMistakes ?? this.maxMistakes,
@@ -118,6 +122,7 @@ class GameBoard {
       isFinished: false,
       isDailyChallenge: isDailyChallenge,
       dailyChallengeId: dailyChallengeId,
+      isSurrendered: false,
       limitMistakesEnabled: false,
       mistakes: 0,
       maxMistakes: 3,
@@ -141,6 +146,7 @@ class GameBoard {
       isFinished: false,
       isDailyChallenge: false,
       dailyChallengeId: null,
+      isSurrendered: false,
       limitMistakesEnabled: false,
       mistakes: 0,
       maxMistakes: 3,
@@ -167,6 +173,7 @@ class GameBoard {
       'isFinished': isFinished,
       'isDailyChallenge': isDailyChallenge,
       'dailyChallengeId': dailyChallengeId,
+      'isSurrendered': isSurrendered,
       'limitMistakesEnabled': limitMistakesEnabled,
       'mistakes': mistakes,
       'maxMistakes': maxMistakes,
@@ -209,6 +216,7 @@ class GameBoard {
       isFinished: map['isFinished'] as bool? ?? false,
       isDailyChallenge: map['isDailyChallenge'] as bool? ?? false,
       dailyChallengeId: map['dailyChallengeId'] as String?,
+      isSurrendered: map['isSurrendered'] as bool? ?? false,
       limitMistakesEnabled: map['limitMistakesEnabled'] as bool? ?? false,
       mistakes: map['mistakes'] as int? ?? 0,
       maxMistakes: map['maxMistakes'] as int? ?? 3,

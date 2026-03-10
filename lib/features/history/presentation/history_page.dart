@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../game/domain/difficulty.dart';
 import '../data/history_storage.dart';
 import '../domain/completed_game.dart';
-import '../../game/domain/difficulty.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -21,6 +21,15 @@ class _HistoryPageState extends State<HistoryPage> {
     history = storage.loadHistory();
   }
 
+  String _statusLabel(GameResultStatus status) {
+    switch (status) {
+      case GameResultStatus.completed:
+        return 'Completado';
+      case GameResultStatus.surrendered:
+        return 'Rendido';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,13 +42,17 @@ class _HistoryPageState extends State<HistoryPage> {
           final game = history[index];
 
           return ListTile(
-            leading: const Icon(Icons.emoji_events),
+            leading: Icon(
+              game.status == GameResultStatus.completed
+                  ? Icons.emoji_events
+                  : Icons.flag_outlined,
+            ),
             title: Text(game.difficulty.label),
             subtitle: Text(
-              "${game.time.inMinutes}:${(game.time.inSeconds % 60).toString().padLeft(2, '0')}",
+              '${game.time.inMinutes}:${(game.time.inSeconds % 60).toString().padLeft(2, '0')} · ${_statusLabel(game.status)}',
             ),
             trailing: Text(
-              "${game.completedAt.day}/${game.completedAt.month}/${game.completedAt.year}",
+              '${game.completedAt.day}/${game.completedAt.month}/${game.completedAt.year}',
             ),
           );
         },
