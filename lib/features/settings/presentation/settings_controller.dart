@@ -27,11 +27,6 @@ class SettingsController extends StateNotifier<AppSettings> {
     _save();
   }
 
-  void toggleSound(bool value) {
-    state = state.copyWith(soundEnabled: value);
-    _save();
-  }
-
   void toggleAnimations(bool value) {
     state = state.copyWith(animationsEnabled: value);
     _save();

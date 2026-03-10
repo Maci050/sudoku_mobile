@@ -8,6 +8,7 @@ import '../../history/presentation/history_page.dart';
 import '../../tips/data/sudoku_tip.dart';
 import '../../tips/domain/sudoku_tip.dart';
 import '../../settings/presentation/settings_page.dart';
+import '../../stats/presentation/stats_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -124,6 +125,13 @@ class HomePage extends StatelessWidget {
             _openDailyChallenge(context);
           } else if (index == 2) {
             _openHistory(context);
+          } else if (index == 3) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const StatsPage(),
+              ),
+            );
           }
         },
         destinations: const [
@@ -141,6 +149,11 @@ class HomePage extends StatelessWidget {
             icon: Icon(Icons.history_outlined),
             selectedIcon: Icon(Icons.history),
             label: 'Historial',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
+            label: 'Estadísticas',
           ),
         ],
       ),

@@ -26,12 +26,6 @@ class SettingsPage extends ConsumerWidget {
             onChanged: controller.toggleVibration,
           ),
           SwitchListTile(
-            title: const Text('Sonido'),
-            subtitle: const Text('Efectos de sonido al jugar'),
-            value: settings.soundEnabled,
-            onChanged: controller.toggleSound,
-          ),
-          SwitchListTile(
             title: const Text('Animaciones'),
             subtitle: const Text('Activar transiciones y efectos visuales'),
             value: settings.animationsEnabled,

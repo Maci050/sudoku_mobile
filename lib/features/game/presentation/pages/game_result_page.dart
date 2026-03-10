@@ -1,8 +1,10 @@
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/services/feedback_service.dart';
 import '../../../home/presentation/home_page.dart';
 import '../../domain/difficulty.dart';
 
-class GameResultPage extends StatelessWidget {
+class GameResultPage extends StatefulWidget {
   final bool won;
   final bool isDailyChallenge;
   final Difficulty difficulty;
@@ -18,20 +20,74 @@ class GameResultPage extends StatelessWidget {
     required this.mistakes,
   });
 
+  @override
+  State<GameResultPage> createState() => _GameResultPageState();
+}
+
+class _GameResultPageState extends State<GameResultPage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<double> _scaleAnimation;
+  late final ConfettiController _confettiController;
+
   String get formattedTime {
-    final totalSeconds = elapsed.inSeconds;
+    final totalSeconds = widget.elapsed.inSeconds;
     final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
     final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 650),
+    );
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    );
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.85,
+      end: 1,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOutBack,
+      ),
+    );
+
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 2),
+    );
+
+    _controller.forward();
+
+    if (widget.won) {
+      _confettiController.play();
+      FeedbackService.vibrateWin();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final title = won ? '¡Nivel completado!' : 'Partida terminada';
-    final subtitle = won
-        ? (isDailyChallenge
+    final title = widget.won ? '¡Nivel completado!' : 'Partida terminada';
+    final subtitle = widget.won
+        ? (widget.isDailyChallenge
             ? 'Has superado el desafío diario'
-            : 'Has completado un Sudoku ${difficulty.label}')
+            : 'Has completado un Sudoku ${widget.difficulty.label}')
         : 'Has alcanzado el límite de errores';
 
     return Scaffold(
@@ -41,67 +97,105 @@ class GameResultPage extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 20),
-              Icon(
-                won ? Icons.emoji_events : Icons.error_outline,
-                size: 72,
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: 0.8,
+                emissionFrequency: 0.05,
+                numberOfParticles: 12,
+                gravity: 0.18,
+                maxBlastForce: 18,
+                minBlastForce: 8,
               ),
-              const SizedBox(height: 20),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            ),
+            Align(
+              alignment: Alignment.topRight,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: 2.3,
+                emissionFrequency: 0.05,
+                numberOfParticles: 12,
+                gravity: 0.18,
+                maxBlastForce: 18,
+                minBlastForce: 8,
               ),
-              const SizedBox(height: 8),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 32),
-              Card(
+            ),
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(24),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _SummaryRow(
-                        label: 'Modo',
-                        value: isDailyChallenge ? 'Desafío diario' : difficulty.label,
+                      const SizedBox(height: 20),
+                      Icon(
+                        widget.won ? Icons.emoji_events : Icons.error_outline,
+                        size: 84,
                       ),
-                      const SizedBox(height: 12),
-                      _SummaryRow(
-                        label: 'Tiempo',
-                        value: formattedTime,
+                      const SizedBox(height: 20),
+                      Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
-                      const SizedBox(height: 12),
-                      _SummaryRow(
-                        label: 'Errores',
-                        value: '$mistakes',
+                      const SizedBox(height: 8),
+                      Text(
+                        subtitle,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 32),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              _SummaryRow(
+                                label: 'Modo',
+                                value: widget.isDailyChallenge
+                                    ? 'Desafío diario'
+                                    : widget.difficulty.label,
+                              ),
+                              const SizedBox(height: 12),
+                              _SummaryRow(
+                                label: 'Tiempo',
+                                value: formattedTime,
+                              ),
+                              const SizedBox(height: 12),
+                              _SummaryRow(
+                                label: 'Errores',
+                                value: '${widget.mistakes}',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      FilledButton(
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const HomePage(),
+                            ),
+                            (route) => false,
+                          );
+                        },
+                        child: const Text('Volver al inicio'),
                       ),
                     ],
                   ),
                 ),
               ),
-              const Spacer(),
-              FilledButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomePage()),
-                    (route) => false,
-                  );
-                },
-                child: const Text('Volver al inicio'),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
