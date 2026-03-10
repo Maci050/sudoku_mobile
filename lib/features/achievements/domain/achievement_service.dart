@@ -77,14 +77,14 @@ class AchievementService {
     if (currentStreak >= 14) unlock(AchievementId.streak14);
     if (currentStreak >= 30) unlock(AchievementId.streak30);
 
+    if (completedGames.any((g) => g.time.inSeconds < 600)) {
+      unlock(AchievementId.under10Minutes);
+    }
+    if (completedGames.any((g) => g.time.inSeconds < 420)) {
+      unlock(AchievementId.under7Minutes);
+    }
     if (completedGames.any((g) => g.time.inSeconds < 300)) {
       unlock(AchievementId.under5Minutes);
-    }
-    if (completedGames.any((g) => g.time.inSeconds < 180)) {
-      unlock(AchievementId.under3Minutes);
-    }
-    if (completedGames.any((g) => g.time.inSeconds < 120)) {
-      unlock(AchievementId.under2Minutes);
     }
 
     if (hasDifficulty('Difícil')) unlock(AchievementId.hardCompleted);

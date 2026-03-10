@@ -250,9 +250,7 @@ class GameController extends StateNotifier<GameBoard> {
     state = state.copyWith(
       values: newValues,
       notes: newNotes,
-      mistakes: (state.limitMistakesEnabled && isWrong)
-          ? state.mistakes + 1
-          : state.mistakes,
+      mistakes: isWrong ? state.mistakes + 1 : state.mistakes,
     );
 
     if (state.limitMistakesEnabled && state.mistakes >= state.maxMistakes) {
