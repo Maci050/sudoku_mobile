@@ -12,24 +12,31 @@ class Keypad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      alignment: WrapAlignment.center,
+    return Row(
       children: List.generate(9, (index) {
         final number = index + 1;
         final disabled = disabledNumbers.contains(number);
 
-        return SizedBox(
-          width: 56,
-          height: 56,
-          child: Opacity(
-            opacity: disabled ? 0.35 : 1,
-            child: ElevatedButton(
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: TextButton(
               onPressed: disabled ? null : () => onPressed(number),
-              child: Text(
-                '$number',
-                style: const TextStyle(fontSize: 20),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: Opacity(
+                opacity: disabled ? 0.30 : 1,
+                child: Text(
+                  '$number',
+                  style: const TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
             ),
           ),

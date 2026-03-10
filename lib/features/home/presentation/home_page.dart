@@ -7,6 +7,7 @@ import '../../game/presentation/pages/game_page.dart';
 import '../../history/presentation/history_page.dart';
 import '../../tips/data/sudoku_tip.dart';
 import '../../tips/domain/sudoku_tip.dart';
+import '../../settings/presentation/settings_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -59,6 +60,19 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Sudoku'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SettingsPage(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(

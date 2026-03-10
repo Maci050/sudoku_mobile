@@ -18,28 +18,82 @@ class GameToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      alignment: WrapAlignment.center,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        FilledButton.tonal(
-          onPressed: onNewGame,
-          child: const Text('Nuevo juego'),
+        _ToolButton(
+          icon: Icons.refresh_rounded,
+          label: 'Nuevo',
+          onTap: onNewGame,
         ),
-        FilledButton.tonal(
-          onPressed: onToggleNotes,
-          child: Text(notesMode ? 'Notas: ON' : 'Notas'),
+        _ToolButton(
+          icon: Icons.backspace_outlined,
+          label: 'Borrar',
+          onTap: onErase,
         ),
-        FilledButton.tonal(
-          onPressed: onErase,
-          child: const Text('Borrar'),
+        _ToolButton(
+          icon: Icons.edit_outlined,
+          label: notesMode ? 'Notas ON' : 'Notas',
+          onTap: onToggleNotes,
+          highlighted: notesMode,
         ),
-        FilledButton.tonal(
-          onPressed: onOpenSettings,
-          child: const Text('Ayudas'),
+        _ToolButton(
+          icon: Icons.tune_rounded,
+          label: 'Ayudas',
+          onTap: onOpenSettings,
         ),
       ],
+    );
+  }
+}
+
+class _ToolButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool highlighted;
+
+  const _ToolButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.highlighted = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Expanded(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: highlighted
+                    ? colorScheme.primaryContainer
+                    : colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  icon,
+                  color: highlighted
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
