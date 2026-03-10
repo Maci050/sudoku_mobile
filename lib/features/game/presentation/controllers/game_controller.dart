@@ -43,6 +43,8 @@ class GameController extends StateNotifier<GameBoard> {
         time: state.elapsed,
         completedAt: DateTime.now(),
         status: GameResultStatus.surrendered,
+        mistakes: state.mistakes,
+        isDailyChallenge: state.isDailyChallenge,
       ),
     );
 
@@ -394,6 +396,8 @@ class GameController extends StateNotifier<GameBoard> {
         time: state.elapsed,
         completedAt: DateTime.now(),
         status: GameResultStatus.completed,
+        mistakes: state.mistakes,
+        isDailyChallenge: state.isDailyChallenge,
       ),
     );
 

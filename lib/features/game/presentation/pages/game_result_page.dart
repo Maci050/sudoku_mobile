@@ -1,9 +1,10 @@
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import '../../../achievements/domain/achievement_service.dart';
 import '../../../../core/services/feedback_service.dart';
 import '../../../home/presentation/home_page.dart';
-import '../../domain/difficulty.dart';
 import '../../../streak/domain/streak_service.dart';
+import '../../domain/difficulty.dart';
 
 class GameResultPage extends StatefulWidget {
   final bool won;
@@ -72,23 +73,44 @@ class _GameResultPageState extends State<GameResultPage>
     if (widget.won) {
       _confettiController.play();
       FeedbackService.vibrateWin();
-      _handleStreak();  
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _handleProgressAndAchievements();
+      });
     }
   }
 
-  Future<void> _handleStreak() async {
-    final streak = await StreakService().registerPlay();
-    
-    if (streak == 3 || streak == 7 || streak == 14 || streak == 30) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('¡Llevas una racha de $streak días! Sigue así.'),
-            duration: const Duration(seconds: 3),
+  Future<void> _handleProgressAndAchievements() async {
+    await StreakService().registerPlay();
+    await Future.delayed(const Duration(milliseconds: 500));
+    final unlocked = await AchievementService().evaluateAndUnlockNewAchievements();
+
+    if (!mounted || unlocked.isEmpty) return;
+
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('🏆 Logro desbloqueado'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: unlocked
+              .map(
+                (a) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text('${a.emoji} ${a.title}'),
+                ),
+              )
+              .toList(),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Genial'),
           ),
-        );
-      }
-    }
+        ],
+      ),
+    );
   }
 
   @override
@@ -104,7 +126,7 @@ class _GameResultPageState extends State<GameResultPage>
     final subtitle = widget.won
         ? (widget.isDailyChallenge
             ? 'Has superado el desafío diario'
-            : 'Has completado un Sudoku ${widget.difficulty.label}')
+            : 'Has completado un Sudoku ${widget.difficulty.name}')
         : 'Has alcanzado el límite de errores';
 
     return Scaffold(
@@ -178,7 +200,7 @@ class _GameResultPageState extends State<GameResultPage>
                                 label: 'Modo',
                                 value: widget.isDailyChallenge
                                     ? 'Desafío diario'
-                                    : widget.difficulty.label,
+                                    : widget.difficulty.name,
                               ),
                               const SizedBox(height: 12),
                               _SummaryRow(

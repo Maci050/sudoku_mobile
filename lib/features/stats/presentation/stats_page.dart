@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../achievements/domain/achievement.dart';
+import '../../achievements/domain/achievement_service.dart';
+import '../../achievements/presentation/achievements_page.dart';
 import '../../history/data/history_storage.dart';
 import '../../streak/data/streak_storage.dart';
 
@@ -15,6 +18,8 @@ class StatsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final history = HistoryStorage().loadHistory();
     final streak = StreakStorage().getCurrentStreak();
+    final unlockedAchievements =
+        AchievementService().loadUnlockedAchievements().length;
 
     final totalGames = history.length;
 
@@ -52,6 +57,28 @@ class StatsPage extends StatelessWidget {
                   fontSize: 18,
                 ),
               ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.emoji_events_outlined),
+              title: const Text('Logros desbloqueados'),
+              trailing: Text(
+                '$unlockedAchievements/${allAchievements.length}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AchievementsPage(),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 12),
