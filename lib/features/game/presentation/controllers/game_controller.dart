@@ -9,6 +9,7 @@ import '../../../history/data/history_storage.dart';
 import '../../../history/domain/completed_game.dart';
 import '../../../daily_challenge/data/daily_challenge_storage.dart';
 
+
 final gameControllerProvider =
     StateNotifierProvider<GameController, GameBoard>((ref) {
   return GameController();

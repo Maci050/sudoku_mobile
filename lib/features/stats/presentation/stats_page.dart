@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../history/data/history_storage.dart';
+import '../../streak/data/streak_storage.dart';
 
 class StatsPage extends StatelessWidget {
   const StatsPage({super.key});
@@ -13,6 +14,7 @@ class StatsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final history = HistoryStorage().loadHistory();
+    final streak = StreakStorage().getCurrentStreak();
 
     final totalGames = history.length;
 
@@ -25,10 +27,9 @@ class StatsPage extends StatelessWidget {
           .reduce((a, b) => a.inSeconds < b.inSeconds ? a : b);
 
       averageTime = Duration(
-        seconds: history
-                .map((e) => e.time.inSeconds)
-                .reduce((a, b) => a + b) ~/
-            history.length,
+        seconds:
+            history.map((e) => e.time.inSeconds).reduce((a, b) => a + b) ~/
+                history.length,
       );
     }
 
@@ -40,6 +41,20 @@ class StatsPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.local_fire_department),
+              title: const Text('Racha actual'),
+              trailing: Text(
+                '$streak días',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           _StatCard(
             title: 'Sudokus completados',
             value: '$totalGames',

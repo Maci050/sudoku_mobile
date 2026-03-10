@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/services/feedback_service.dart';
 import '../../../home/presentation/home_page.dart';
 import '../../domain/difficulty.dart';
+import '../../../streak/domain/streak_service.dart';
 
 class GameResultPage extends StatefulWidget {
   final bool won;
@@ -71,6 +72,22 @@ class _GameResultPageState extends State<GameResultPage>
     if (widget.won) {
       _confettiController.play();
       FeedbackService.vibrateWin();
+      _handleStreak();  
+    }
+  }
+
+  Future<void> _handleStreak() async {
+    final streak = await StreakService().registerPlay();
+    
+    if (streak == 3 || streak == 7 || streak == 14 || streak == 30) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('¡Llevas una racha de $streak días! Sigue así.'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
