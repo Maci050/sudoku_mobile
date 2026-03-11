@@ -28,6 +28,8 @@ class GameBoard {
 
   final HintStep? activeHint;
 
+  static const _noChange = Object();
+
   const GameBoard({
     required this.values,
     required this.fixedCells,
@@ -48,10 +50,10 @@ class GameBoard {
     required this.hideUsedNumbers,
     required this.highlightRegions,
     required this.highlightSameNumbers,
+    required this.activeHint,
     this.selectedRow,
     this.selectedCol,
     this.notesMode = false,
-    required this.activeHint,
   });
 
   GameBoard copyWith({
@@ -64,7 +66,7 @@ class GameBoard {
     bool? isPaused,
     bool? isFinished,
     bool? isDailyChallenge,
-    String? dailyChallengeId,
+    Object? dailyChallengeId = _noChange,
     bool? isSurrendered,
     bool? limitMistakesEnabled,
     int? mistakes,
@@ -74,10 +76,10 @@ class GameBoard {
     bool? hideUsedNumbers,
     bool? highlightRegions,
     bool? highlightSameNumbers,
-    int? selectedRow,
-    int? selectedCol,
+    Object? selectedRow = _noChange,
+    Object? selectedCol = _noChange,
     bool? notesMode,
-    HintStep? activeHint,
+    Object? activeHint = _noChange,
   }) {
     return GameBoard(
       values: values ?? this.values,
@@ -89,7 +91,9 @@ class GameBoard {
       isPaused: isPaused ?? this.isPaused,
       isFinished: isFinished ?? this.isFinished,
       isDailyChallenge: isDailyChallenge ?? this.isDailyChallenge,
-      dailyChallengeId: dailyChallengeId ?? this.dailyChallengeId,
+      dailyChallengeId: identical(dailyChallengeId, _noChange)
+          ? this.dailyChallengeId
+          : dailyChallengeId as String?,
       isSurrendered: isSurrendered ?? this.isSurrendered,
       limitMistakesEnabled: limitMistakesEnabled ?? this.limitMistakesEnabled,
       mistakes: mistakes ?? this.mistakes,
@@ -98,11 +102,18 @@ class GameBoard {
       highlightDuplicates: highlightDuplicates ?? this.highlightDuplicates,
       hideUsedNumbers: hideUsedNumbers ?? this.hideUsedNumbers,
       highlightRegions: highlightRegions ?? this.highlightRegions,
-      highlightSameNumbers: highlightSameNumbers ?? this.highlightSameNumbers,
-      selectedRow: selectedRow ?? this.selectedRow,
-      selectedCol: selectedCol ?? this.selectedCol,
+      highlightSameNumbers:
+          highlightSameNumbers ?? this.highlightSameNumbers,
+      selectedRow: identical(selectedRow, _noChange)
+          ? this.selectedRow
+          : selectedRow as int?,
+      selectedCol: identical(selectedCol, _noChange)
+          ? this.selectedCol
+          : selectedCol as int?,
       notesMode: notesMode ?? this.notesMode,
-      activeHint: activeHint ?? this.activeHint,
+      activeHint: identical(activeHint, _noChange)
+          ? this.activeHint
+          : activeHint as HintStep?,
     );
   }
 
@@ -168,14 +179,18 @@ class GameBoard {
 
   Map<String, dynamic> toMap() {
     return {
-      'values': values.map((row) => row.map((value) => value ?? 0).toList()).toList(),
+      'values': values
+          .map((row) => row.map((value) => value ?? 0).toList())
+          .toList(),
       'fixedCells': fixedCells,
       'solution': solution,
-      'difficulty': difficulty.name,
+      'difficulty': difficulty.toString(),
       'selectedRow': selectedRow,
       'selectedCol': selectedCol,
       'notesMode': notesMode,
-      'notes': notes.map((row) => row.map((cellNotes) => cellNotes.toList()).toList()).toList(),
+      'notes': notes
+          .map((row) => row.map((cellNotes) => cellNotes.toList()).toList())
+          .toList(),
       'elapsedSeconds': elapsed.inSeconds,
       'isPaused': isPaused,
       'isFinished': isFinished,
@@ -195,30 +210,49 @@ class GameBoard {
   }
 
   factory GameBoard.fromMap(Map<dynamic, dynamic> map) {
+    final difficultyString = (map['difficulty'] as String? ?? '').toLowerCase();
+
+    Difficulty parseDifficulty() {
+      for (final d in Difficulty.values) {
+        if (d.toString().toLowerCase() == difficultyString) {
+          return d;
+        }
+      }
+      return Difficulty.easy;
+    }
+
     return GameBoard(
       values: (map['values'] as List)
-          .map<List<int?>>((row) => (row as List)
-              .map<int?>((value) => value == 0 ? null : value as int)
-              .toList())
+          .map<List<int?>>(
+            (row) => (row as List)
+                .map<int?>((value) => value == 0 ? null : value as int)
+                .toList(),
+          )
           .toList(),
       fixedCells: (map['fixedCells'] as List)
-          .map<List<bool>>((row) => (row as List).map<bool>((value) => value as bool).toList())
+          .map<List<bool>>(
+            (row) => (row as List).map<bool>((value) => value as bool).toList(),
+          )
           .toList(),
       solution: (map['solution'] as List)
-          .map<List<int>>((row) => (row as List).map<int>((value) => value as int).toList())
+          .map<List<int>>(
+            (row) => (row as List).map<int>((value) => value as int).toList(),
+          )
           .toList(),
-      difficulty: Difficulty.values.firstWhere(
-        (d) => d.name == map['difficulty'],
-        orElse: () => Difficulty.easy,
-      ),
+      difficulty: parseDifficulty(),
       selectedRow: map['selectedRow'] as int?,
       selectedCol: map['selectedCol'] as int?,
       notesMode: map['notesMode'] as bool? ?? false,
       notes: (map['notes'] as List)
-          .map<List<Set<int>>>((row) => (row as List)
-              .map<Set<int>>((cellNotes) =>
-                  (cellNotes as List).map<int>((value) => value as int).toSet())
-              .toList())
+          .map<List<Set<int>>>(
+            (row) => (row as List)
+                .map<Set<int>>(
+                  (cellNotes) => (cellNotes as List)
+                      .map<int>((value) => value as int)
+                      .toSet(),
+                )
+                .toList(),
+          )
           .toList(),
       elapsed: Duration(seconds: map['elapsedSeconds'] as int? ?? 0),
       isPaused: map['isPaused'] as bool? ?? false,
