@@ -4,6 +4,11 @@ enum HintTechnique {
   nakedSingle,
   hiddenSingle,
   nakedPair,
+  hiddenPair,
+  pointingPair,
+  boxLineReduction,
+  noteCleanup,
+  missingNotes,
 }
 
 class HintStep {
@@ -12,6 +17,7 @@ class HintStep {
   final String description;
   final List<CellPosition> focusCells;
   final List<CellPosition> relatedCells;
+  final bool canAutoApply;
 
   const HintStep({
     required this.technique,
@@ -19,6 +25,7 @@ class HintStep {
     required this.description,
     this.focusCells = const [],
     this.relatedCells = const [],
+    this.canAutoApply = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -28,6 +35,7 @@ class HintStep {
       'description': description,
       'focusCells': focusCells.map((e) => e.toMap()).toList(),
       'relatedCells': relatedCells.map((e) => e.toMap()).toList(),
+      'canAutoApply': canAutoApply,
     };
   }
 
@@ -42,6 +50,7 @@ class HintStep {
       relatedCells: (map['relatedCells'] as List)
           .map((e) => CellPosition.fromMap(e as Map))
           .toList(),
+      canAutoApply: map['canAutoApply'] as bool? ?? false,
     );
   }
 }

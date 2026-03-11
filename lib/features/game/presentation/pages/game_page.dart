@@ -213,6 +213,11 @@ class _GamePageState extends ConsumerState<GamePage> {
                           onClose: () {
                             ref.read(gameControllerProvider.notifier).clearHint();
                           },
+                          onApply: board.activeHint!.canAutoApply
+                              ? () {
+                                  ref.read(gameControllerProvider.notifier).applyHintAction();
+                                }
+                              : null,
                         ),
                       ),
                     ],

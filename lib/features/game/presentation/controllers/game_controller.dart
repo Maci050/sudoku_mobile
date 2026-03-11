@@ -9,6 +9,7 @@ import '../../domain/sudoku_hint_engine.dart';
 import '../../../history/data/history_storage.dart';
 import '../../../history/domain/completed_game.dart';
 import '../../../daily_challenge/data/daily_challenge_storage.dart';
+import '../../domain/hint_step.dart';
 
 final gameControllerProvider =
     StateNotifierProvider<GameController, GameBoard>((ref) {
@@ -360,6 +361,61 @@ class GameController extends StateNotifier<GameBoard> {
     state = state.copyWith(activeHint: null);
     _saveGame();
   }
+
+  void applyHintAction() {
+  final hint = state.activeHint;
+  if (hint == null) return;
+  if (!hint.canAutoApply) return;
+  if (hint.focusCells.isEmpty) return;
+
+  final target = hint.focusCells.first;
+  final row = target.row;
+  final col = target.col;
+
+  if (state.values[row][col] != null) return;
+
+  final validCandidates = _calculateCandidatesForCell(row, col);
+  final newNotes = state.notes
+      .map((r) => r.map((s) => {...s}).toList())
+      .toList();
+
+  if (hint.technique == HintTechnique.noteCleanup ||
+      hint.technique == HintTechnique.missingNotes) {
+    newNotes[row][col] = validCandidates;
+  }
+
+  state = state.copyWith(
+    notes: newNotes,
+    activeHint: null,
+  );
+  _saveGame();
+}
+
+Set<int> _calculateCandidatesForCell(int row, int col) {
+  if (state.values[row][col] != null) return <int>{};
+
+  final used = <int>{};
+
+  for (int i = 0; i < 9; i++) {
+    final rowValue = state.values[row][i];
+    final colValue = state.values[i][col];
+
+    if (rowValue != null) used.add(rowValue);
+    if (colValue != null) used.add(colValue);
+  }
+
+  final startRow = (row ~/ 3) * 3;
+  final startCol = (col ~/ 3) * 3;
+
+  for (int r = startRow; r < startRow + 3; r++) {
+    for (int c = startCol; c < startCol + 3; c++) {
+      final value = state.values[r][c];
+      if (value != null) used.add(value);
+    }
+  }
+
+  return {1, 2, 3, 4, 5, 6, 7, 8, 9}.difference(used);
+}
 
   bool isWrongValue(int row, int col) {
     if (!state.highlightErrors) return false;
