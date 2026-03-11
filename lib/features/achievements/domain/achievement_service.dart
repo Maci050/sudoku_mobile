@@ -30,24 +30,12 @@ class AchievementService {
     String difficultyText(dynamic difficulty) {
       final value = difficulty.toString().toLowerCase();
 
-      if (value.contains('easy') || value.contains('fácil')) {
-        return 'Fácil';
-      }
-      if (value.contains('medium') || value.contains('medio')) {
-        return 'Medio';
-      }
-      if (value.contains('hard') || value.contains('difícil')) {
-        return 'Difícil';
-      }
-      if (value.contains('expert') || value.contains('experto')) {
-        return 'Experto';
-      }
-      if (value.contains('master') || value.contains('maestro')) {
-        return 'Maestro';
-      }
-      if (value.contains('extreme') || value.contains('extremo')) {
-        return 'Extremo';
-      }
+      if (value.contains('easy') || value.contains('fácil')) return 'Fácil';
+      if (value.contains('medium') || value.contains('medio')) return 'Medio';
+      if (value.contains('hard') || value.contains('difícil')) return 'Difícil';
+      if (value.contains('expert') || value.contains('experto')) return 'Experto';
+      if (value.contains('master') || value.contains('maestro')) return 'Maestro';
+      if (value.contains('extreme') || value.contains('extremo')) return 'Extremo';
 
       return value;
     }
@@ -60,6 +48,13 @@ class AchievementService {
 
     final noMistakeGames = completedGames.where((g) => g.mistakes == 0).length;
     final dailyCompleted = completedGames.where((g) => g.isDailyChallenge).length;
+
+    final noHintGames = completedGames.where((g) => g.hintsUsed == 0).length;
+    final totalHintsUsed = history.fold<int>(0, (sum, g) => sum + g.hintsUsed);
+    final perfectGames = completedGames
+        .where((g) => g.mistakes == 0 && g.hintsUsed == 0)
+        .length;
+    final usedAnyHint = history.any((g) => g.hintsUsed > 0);
 
     void unlock(AchievementId id) {
       if (unlockedIds.contains(id.name)) return;
@@ -97,8 +92,17 @@ class AchievementService {
     if (dailyCompleted >= 1) unlock(AchievementId.firstDaily);
     if (dailyCompleted >= 7) unlock(AchievementId.daily7);
 
-    await _achievementsStorage.saveUnlockedIds(unlockedIds);
+    if (noHintGames >= 1) unlock(AchievementId.noHintsOne);
+    if (noHintGames >= 10) unlock(AchievementId.noHintsTen);
+    if (noHintGames >= 50) unlock(AchievementId.noHintsFifty);
 
+    if (usedAnyHint) unlock(AchievementId.firstHintUsed);
+    if (totalHintsUsed >= 25) unlock(AchievementId.hints25);
+    if (totalHintsUsed >= 100) unlock(AchievementId.hints100);
+
+    if (perfectGames >= 1) unlock(AchievementId.perfectRun);
+
+    await _achievementsStorage.saveUnlockedIds(unlockedIds);
     return newlyUnlocked;
   }
 }

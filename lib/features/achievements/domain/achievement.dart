@@ -17,6 +17,14 @@ enum AchievementId {
   daily7,
   veteran50,
   legend100,
+
+  noHintsOne,
+  noHintsTen,
+  noHintsFifty,
+  firstHintUsed,
+  hints25,
+  hints100,
+  perfectRun,
 }
 
 class Achievement {
@@ -141,5 +149,48 @@ const allAchievements = [
     title: 'Leyenda',
     description: 'Completa 100 Sudokus.',
     emoji: '🏁',
+  ),
+
+  Achievement(
+    id: AchievementId.noHintsOne,
+    title: 'Pensador independiente',
+    description: 'Completa un Sudoku sin usar pistas.',
+    emoji: '🧩',
+  ),
+  Achievement(
+    id: AchievementId.noHintsTen,
+    title: 'Mente lógica',
+    description: 'Completa 10 Sudokus sin usar pistas.',
+    emoji: '🧩',
+  ),
+  Achievement(
+    id: AchievementId.noHintsFifty,
+    title: 'Maestro sin ayuda',
+    description: 'Completa 50 Sudokus sin usar pistas.',
+    emoji: '🧩',
+  ),
+  Achievement(
+    id: AchievementId.firstHintUsed,
+    title: 'Primera pista',
+    description: 'Usa una pista por primera vez.',
+    emoji: '💡',
+  ),
+  Achievement(
+    id: AchievementId.hints25,
+    title: 'Explorador',
+    description: 'Usa 25 pistas en total.',
+    emoji: '💡',
+  ),
+  Achievement(
+    id: AchievementId.hints100,
+    title: 'Aprendiz',
+    description: 'Usa 100 pistas en total.',
+    emoji: '💡',
+  ),
+  Achievement(
+    id: AchievementId.perfectRun,
+    title: 'Perfecto',
+    description: 'Completa un Sudoku sin errores ni pistas.',
+    emoji: '✨',
   ),
 ];
