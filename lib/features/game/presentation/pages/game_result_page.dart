@@ -5,6 +5,7 @@ import '../../../../core/services/feedback_service.dart';
 import '../../../home/presentation/home_page.dart';
 import '../../../streak/domain/streak_service.dart';
 import '../../domain/difficulty.dart';
+import '../../../activity/data/activity_storage.dart';
 
 class GameResultPage extends StatefulWidget {
   final bool won;
@@ -81,6 +82,7 @@ class _GameResultPageState extends State<GameResultPage>
   }
 
   Future<void> _handleProgressAndAchievements() async {
+    await ActivityStorage().registerTodayActivity();
     await StreakService().registerPlay();
     await Future.delayed(const Duration(milliseconds: 500));
     final unlocked = await AchievementService().evaluateAndUnlockNewAchievements();

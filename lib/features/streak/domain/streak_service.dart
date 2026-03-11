@@ -9,6 +9,7 @@ class StreakService {
 
     final last = storage.getLastPlayedDate();
     int streak = storage.getCurrentStreak();
+    int bestStreak = storage.getBestStreak();
 
     if (last == null) {
       streak = 1;
@@ -23,6 +24,11 @@ class StreakService {
       } else {
         streak = 1;
       }
+    }
+
+    if (streak > bestStreak) {
+      bestStreak = streak;
+      await storage.saveBestStreak(bestStreak);
     }
 
     await storage.saveLastPlayed(today);
