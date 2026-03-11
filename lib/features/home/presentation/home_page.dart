@@ -9,6 +9,7 @@ import '../../tips/data/sudoku_tip.dart';
 import '../../tips/domain/sudoku_tip.dart';
 import '../../settings/presentation/settings_page.dart';
 import '../../stats/presentation/stats_page.dart';
+import '../../training/presentation/training_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -96,6 +97,24 @@ class HomePage extends StatelessWidget {
                 title: 'Nueva partida',
                 filled: false,
                 onTap: () => _openNewGameSelector(context),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _HomeActionButton(
+                title: 'Entrenamiento',
+                subtitle: 'Mejora tus habilidades con ejercicios específicos',
+                filled: false,
+                icon: Icons.fitness_center,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const TrainingPage(),
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 24),
