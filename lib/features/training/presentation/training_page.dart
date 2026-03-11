@@ -29,16 +29,51 @@ class TrainingPage extends StatelessWidget {
     }
   }
 
-  bool _isUnlocked(
+  bool _isLevelUnlocked(
     TrainingLevel level,
     List<TrainingLevel> levelsInGroup,
     Set<String> completed,
   ) {
-    final index = levelsInGroup.indexWhere((l) => l.id == level.id);
+    final sorted = [...levelsInGroup]..sort((a, b) => a.order.compareTo(b.order));
+    final index = sorted.indexWhere((l) => l.id == level.id);
+
     if (index <= 0) return true;
 
-    final previous = levelsInGroup[index - 1];
+    final previous = sorted[index - 1];
     return completed.contains(previous.id);
+  }
+
+  bool _isDifficultyUnlocked(
+    TrainingDifficulty difficulty,
+    Map<TrainingDifficulty, List<TrainingLevel>> grouped,
+    Set<String> completed,
+  ) {
+    if (difficulty == TrainingDifficulty.basic) return true;
+
+    if (difficulty == TrainingDifficulty.intermediate) {
+      final basicLevels = grouped[TrainingDifficulty.basic] ?? [];
+      return basicLevels.isNotEmpty &&
+          basicLevels.every((level) => completed.contains(level.id));
+    }
+
+    if (difficulty == TrainingDifficulty.advanced) {
+      final intermediateLevels = grouped[TrainingDifficulty.intermediate] ?? [];
+      return intermediateLevels.isNotEmpty &&
+          intermediateLevels.every((level) => completed.contains(level.id));
+    }
+
+    return false;
+  }
+
+  String _lockedMessage(TrainingDifficulty difficulty) {
+    switch (difficulty) {
+      case TrainingDifficulty.basic:
+        return '';
+      case TrainingDifficulty.intermediate:
+        return 'Completa todos los niveles básicos para desbloquear esta categoría.';
+      case TrainingDifficulty.advanced:
+        return 'Completa todos los niveles intermedios para desbloquear esta categoría.';
+    }
   }
 
   @override
@@ -50,6 +85,10 @@ class TrainingPage extends StatelessWidget {
       grouped.putIfAbsent(level.difficulty, () => []).add(level);
     }
 
+    for (final entry in grouped.entries) {
+      entry.value.sort((a, b) => a.order.compareTo(b.order));
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Entrenamiento'),
@@ -59,6 +98,8 @@ class TrainingPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: TrainingDifficulty.values.map((difficulty) {
           final levels = grouped[difficulty] ?? [];
+          final difficultyUnlocked =
+              _isDifficultyUnlocked(difficulty, grouped, completed);
 
           final completedInGroup =
               levels.where((level) => completed.contains(level.id)).length;
@@ -87,9 +128,19 @@ class TrainingPage extends StatelessWidget {
                         Text('$completedInGroup/${levels.length}'),
                       ],
                     ),
+                    if (!difficultyUnlocked) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        _lockedMessage(difficulty),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     ...levels.map((level) {
-                      final unlocked = _isUnlocked(level, levels, completed);
+                      final unlocked = difficultyUnlocked &&
+                          _isLevelUnlocked(level, levels, completed);
                       final isCompleted = completed.contains(level.id);
 
                       return ListTile(
@@ -130,18 +181,14 @@ class TrainingPage extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer,
+                          color: Theme.of(context).colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           'Categoría completada 🏅',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
                           ),
                         ),
                       ),

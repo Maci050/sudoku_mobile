@@ -9,6 +9,7 @@ class TrainingLevel {
   final String title;
   final String technique;
   final TrainingDifficulty difficulty;
+  final int order;
   final String objective;
   final String explanation;
   final List<List<int>> puzzle;
@@ -21,6 +22,7 @@ class TrainingLevel {
     required this.title,
     required this.technique,
     required this.difficulty,
+    required this.order,
     required this.objective,
     required this.explanation,
     required this.puzzle,
