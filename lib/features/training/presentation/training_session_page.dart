@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/training_progress_storage.dart';
 import '../domain/training_level.dart';
 import 'widgets/training_grid.dart';
+import '../../achievements/domain/achievement_service.dart';
 
 class TrainingSessionPage extends StatefulWidget {
   final TrainingLevel level;
@@ -40,37 +41,55 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
   }
 
   Future<void> _inputNumber(int number) async {
-    if (solved) return;
-    if (selectedRow == null || selectedCol == null) return;
-
     if (selectedRow == widget.level.targetRow &&
-        selectedCol == widget.level.targetCol &&
-        number == widget.level.targetValue) {
-      setState(() {
-        values[selectedRow!][selectedCol!] = number;
-        solved = true;
-      });
+      selectedCol == widget.level.targetCol &&
+      number == widget.level.targetValue) {
+    setState(() {
+      values[selectedRow!][selectedCol!] = number;
+      solved = true;
+    });
 
-      await TrainingProgressStorage().markCompleted(widget.level.id);
+    await TrainingProgressStorage().markCompleted(widget.level.id);
+    final unlocked = await AchievementService().evaluateAndUnlockNewAchievements();
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      await showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('¡Correcto!'),
-          content: Text(widget.level.explanation),
-          actions: [
-            FilledButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Seguir'),
-            ),
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('¡Correcto!'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.level.explanation),
+            if (unlocked.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              const Text(
+                'Logros desbloqueados:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ...unlocked.map(
+                (achievement) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text('${achievement.emoji} ${achievement.title}'),
+                ),
+              ),
+            ],
           ],
         ),
-      );
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Seguir'),
+          ),
+        ],
+      ),
+    );
 
-      if (!mounted) return;
-      Navigator.pop(context, true);
+    if (!mounted) return;
+    Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

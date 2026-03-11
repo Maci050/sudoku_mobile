@@ -1,6 +1,9 @@
 import '../../history/data/history_storage.dart';
 import '../../history/domain/completed_game.dart';
 import '../../streak/data/streak_storage.dart';
+import '../../training/data/training_levels_data.dart';
+import '../../training/data/training_progress_storage.dart';
+import '../../training/domain/training_level.dart';
 import '../data/achievements_storage.dart';
 import 'achievement.dart';
 
@@ -8,6 +11,8 @@ class AchievementService {
   final HistoryStorage _historyStorage = HistoryStorage();
   final StreakStorage _streakStorage = StreakStorage();
   final AchievementsStorage _achievementsStorage = AchievementsStorage();
+  final TrainingProgressStorage _trainingProgressStorage =
+      TrainingProgressStorage();
 
   List<Achievement> loadUnlockedAchievements() {
     final unlocked = _achievementsStorage.loadUnlockedIds();
@@ -56,6 +61,32 @@ class AchievementService {
         .length;
     final usedAnyHint = history.any((g) => g.hintsUsed > 0);
 
+    final completedTraining = _trainingProgressStorage.loadCompletedLevels();
+
+    final basicLevels = trainingLevels
+        .where((level) => level.difficulty == TrainingDifficulty.basic)
+        .toList();
+    final intermediateLevels = trainingLevels
+        .where((level) => level.difficulty == TrainingDifficulty.intermediate)
+        .toList();
+    final advancedLevels = trainingLevels
+        .where((level) => level.difficulty == TrainingDifficulty.advanced)
+        .toList();
+
+    final allTrainingLevels = trainingLevels.map((level) => level.id).toList();
+
+    final basicCompleted = basicLevels.isNotEmpty &&
+        basicLevels.every((level) => completedTraining.contains(level.id));
+
+    final intermediateCompleted = intermediateLevels.isNotEmpty &&
+        intermediateLevels.every((level) => completedTraining.contains(level.id));
+
+    final advancedCompleted = advancedLevels.isNotEmpty &&
+        advancedLevels.every((level) => completedTraining.contains(level.id));
+
+    final allTrainingCompleted = allTrainingLevels.isNotEmpty &&
+        allTrainingLevels.every((id) => completedTraining.contains(id));
+
     void unlock(AchievementId id) {
       if (unlockedIds.contains(id.name)) return;
       unlockedIds.add(id.name);
@@ -101,6 +132,13 @@ class AchievementService {
     if (totalHintsUsed >= 100) unlock(AchievementId.hints100);
 
     if (perfectGames >= 1) unlock(AchievementId.perfectRun);
+
+    if (basicCompleted) unlock(AchievementId.trainingBasicCompleted);
+    if (intermediateCompleted) {
+      unlock(AchievementId.trainingIntermediateCompleted);
+    }
+    if (advancedCompleted) unlock(AchievementId.trainingAdvancedCompleted);
+    if (allTrainingCompleted) unlock(AchievementId.trainingAllCompleted);
 
     await _achievementsStorage.saveUnlockedIds(unlockedIds);
     return newlyUnlocked;

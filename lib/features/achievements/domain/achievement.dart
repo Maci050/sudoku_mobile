@@ -17,7 +17,6 @@ enum AchievementId {
   daily7,
   veteran50,
   legend100,
-
   noHintsOne,
   noHintsTen,
   noHintsFifty,
@@ -25,6 +24,10 @@ enum AchievementId {
   hints25,
   hints100,
   perfectRun,
+  trainingBasicCompleted,
+  trainingIntermediateCompleted,
+  trainingAdvancedCompleted,
+  trainingAllCompleted,
 }
 
 class Achievement {
@@ -192,5 +195,29 @@ const allAchievements = [
     title: 'Perfecto',
     description: 'Completa un Sudoku sin errores ni pistas.',
     emoji: '✨',
+  ),
+    Achievement(
+    id: AchievementId.trainingBasicCompleted,
+    title: 'Base sólida',
+    description: 'Completa todos los ejercicios de entrenamiento básico.',
+    emoji: '🎓',
+  ),
+  Achievement(
+    id: AchievementId.trainingIntermediateCompleted,
+    title: 'Técnica refinada',
+    description: 'Completa todos los ejercicios de entrenamiento intermedio.',
+    emoji: '🧠',
+  ),
+  Achievement(
+    id: AchievementId.trainingAdvancedCompleted,
+    title: 'Dominio avanzado',
+    description: 'Completa todos los ejercicios de entrenamiento avanzado.',
+    emoji: '🏅',
+  ),
+  Achievement(
+    id: AchievementId.trainingAllCompleted,
+    title: 'Maestro del entrenamiento',
+    description: 'Completa todos los ejercicios de entrenamiento.',
+    emoji: '🏆',
   ),
 ];
