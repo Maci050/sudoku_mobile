@@ -26,6 +26,8 @@ class GameBoard {
   final bool highlightRegions;
   final bool highlightSameNumbers;
 
+  final int hintsUsed;
+
   final HintStep? activeHint;
 
   static const _noChange = Object();
@@ -54,6 +56,7 @@ class GameBoard {
     this.selectedRow,
     this.selectedCol,
     this.notesMode = false,
+    required this.hintsUsed,
   });
 
   GameBoard copyWith({
@@ -80,6 +83,7 @@ class GameBoard {
     Object? selectedCol = _noChange,
     bool? notesMode,
     Object? activeHint = _noChange,
+    int? hintsUsed,
   }) {
     return GameBoard(
       values: values ?? this.values,
@@ -114,6 +118,7 @@ class GameBoard {
       activeHint: identical(activeHint, _noChange)
           ? this.activeHint
           : activeHint as HintStep?,
+      hintsUsed: hintsUsed ?? this.hintsUsed,
     );
   }
 
@@ -149,6 +154,7 @@ class GameBoard {
       highlightRegions: true,
       highlightSameNumbers: true,
       activeHint: null,
+      hintsUsed: 0,
     );
   }
 
@@ -174,6 +180,7 @@ class GameBoard {
       highlightRegions: true,
       highlightSameNumbers: true,
       activeHint: null,
+      hintsUsed: 0,
     );
   }
 
@@ -206,6 +213,7 @@ class GameBoard {
       'highlightRegions': highlightRegions,
       'highlightSameNumbers': highlightSameNumbers,
       'activeHint': activeHint?.toMap(),
+      'hintsUsed': hintsUsed,
     };
   }
 
@@ -271,6 +279,7 @@ class GameBoard {
       activeHint: map['activeHint'] != null
           ? HintStep.fromMap(map['activeHint'] as Map)
           : null,
+      hintsUsed: map['hintsUsed'] as int? ?? 0,
     );
   }
 }

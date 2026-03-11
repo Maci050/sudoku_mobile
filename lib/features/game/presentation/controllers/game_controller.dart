@@ -161,6 +161,7 @@ class GameController extends StateNotifier<GameBoard> {
         status: GameResultStatus.surrendered,
         mistakes: state.mistakes,
         isDailyChallenge: state.isDailyChallenge,
+        hintsUsed: state.hintsUsed,
       ),
     );
 
@@ -352,7 +353,11 @@ class GameController extends StateNotifier<GameBoard> {
       return false;
     }
 
-    state = state.copyWith(activeHint: hint);
+    state = state.copyWith(
+      activeHint: hint,
+      hintsUsed: state.hintsUsed + 1,
+    );
+
     _saveGame();
     return true;
   }
@@ -522,6 +527,7 @@ Set<int> _calculateCandidatesForCell(int row, int col) {
         status: GameResultStatus.completed,
         mistakes: state.mistakes,
         isDailyChallenge: state.isDailyChallenge,
+        hintsUsed: state.hintsUsed,
       ),
     );
 

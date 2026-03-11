@@ -12,6 +12,7 @@ class CompletedGame {
   final GameResultStatus status;
   final int mistakes;
   final bool isDailyChallenge;
+  final int hintsUsed;
 
   const CompletedGame({
     required this.difficulty,
@@ -20,6 +21,7 @@ class CompletedGame {
     required this.status,
     this.mistakes = 0,
     this.isDailyChallenge = false,
+    required this.hintsUsed,
   });
 
   Map<String, dynamic> toMap() {
@@ -30,6 +32,7 @@ class CompletedGame {
       'status': status.name,
       'mistakes': mistakes,
       'isDailyChallenge': isDailyChallenge,
+      'hintsUsed': hintsUsed,
     };
   }
 
@@ -47,6 +50,7 @@ class CompletedGame {
       ),
       mistakes: map['mistakes'] as int? ?? 0,
       isDailyChallenge: map['isDailyChallenge'] as bool? ?? false,
+      hintsUsed: map['hintsUsed'] as int? ?? 0,
     );
   }
 }

@@ -248,6 +248,7 @@ class _GamePageState extends ConsumerState<GamePage> {
                                   difficulty: updatedBoard.difficulty,
                                   elapsed: updatedBoard.elapsed,
                                   mistakes: updatedBoard.mistakes,
+                                  hintsUsed: updatedBoard.hintsUsed,
                                 ),
                               ),
                             );
@@ -263,6 +264,7 @@ class _GamePageState extends ConsumerState<GamePage> {
                                   difficulty: updatedBoard.difficulty,
                                   elapsed: updatedBoard.elapsed,
                                   mistakes: updatedBoard.mistakes,
+                                  hintsUsed: updatedBoard.hintsUsed,
                                 ),
                               ),
                             );

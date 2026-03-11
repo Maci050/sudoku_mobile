@@ -97,6 +97,13 @@ class StatsPage extends StatelessWidget {
       'Extremo',
     ];
 
+    final gamesWithoutHints = 
+      history.where((g) => g.hintsUsed == 0).length;
+    final avgHints = history.isEmpty
+      ? 0
+      : history.map((g) => g.hintsUsed).reduce((a, b) => a + b) ~/
+          history.length;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Estadísticas'),
@@ -188,6 +195,16 @@ class StatsPage extends StatelessWidget {
           _StatCard(
             title: 'Tiempo medio',
             value: averageTime != null ? _formatDuration(averageTime) : '--:--',
+          ),
+          const SizedBox(height: 12),
+          _StatCard(
+            title: 'Partidas sin usar pistas',
+            value: '$gamesWithoutHints',
+          ),
+            const SizedBox(height: 12),
+          _StatCard(
+            title: 'Pistas usadas de media',
+            value: '$avgHints',
           ),
           const SizedBox(height: 24),
           _SectionTitle(title: 'Por dificultad'),

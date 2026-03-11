@@ -13,6 +13,7 @@ class GameResultPage extends StatefulWidget {
   final Difficulty difficulty;
   final Duration elapsed;
   final int mistakes;
+  final int hintsUsed;
 
   const GameResultPage({
     super.key,
@@ -21,6 +22,7 @@ class GameResultPage extends StatefulWidget {
     required this.difficulty,
     required this.elapsed,
     required this.mistakes,
+    required this.hintsUsed,
   });
 
   @override
@@ -214,6 +216,11 @@ class _GameResultPageState extends State<GameResultPage>
                                 label: 'Errores',
                                 value: '${widget.mistakes}',
                               ),
+                              const SizedBox(height: 12),
+                              _SummaryRow(
+                                label: 'Pistas usadas',
+                                value: '${widget.won ? widget.hintsUsed : 0}',
+                              )
                             ],
                           ),
                         ),
