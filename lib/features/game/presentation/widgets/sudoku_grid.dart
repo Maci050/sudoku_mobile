@@ -29,7 +29,18 @@ class SudokuGrid extends ConsumerWidget {
                   final hasError = controller.isWrongValue(row, col);
                   final hasDuplicate = controller.hasDuplicate(row, col);
                   final isHighlighted = controller.shouldHighlightCell(row, col);
+                  final hint = board.activeHint;
 
+                  final isHintFocus = hint?.focusCells.any(
+                    (cell) => cell.row == row && cell.col == col
+                  ) ??
+                  false;
+
+                  final isHintRelated = hint?.relatedCells.any(
+                    (cell) => cell.row == row && cell.col == col
+                  ) ??
+                  false;
+                  
                   Color backgroundColor = Colors.white;
 
                   if (isHighlighted) {
@@ -44,9 +55,17 @@ class SudokuGrid extends ConsumerWidget {
                     backgroundColor = Colors.red.withValues(alpha: 0.15);
                   }
 
+                  if (isHintFocus) {
+                    backgroundColor = Colors.amber.withValues(alpha: 0.55);
+                  } else if (isHintRelated) {
+                    backgroundColor = Colors.amber.withValues(alpha: 0.22);
+                  }
+
                   if (isSelected) {
                     backgroundColor = Colors.blue.withValues(alpha: 0.20);
                   }
+
+                  
 
                   return Expanded(
                     child: GestureDetector(

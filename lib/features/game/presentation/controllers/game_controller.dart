@@ -5,10 +5,10 @@ import '../../data/game_storage.dart';
 import '../../data/sudoku_generator.dart';
 import '../../domain/difficulty.dart';
 import '../../domain/game_board.dart';
+import '../../domain/sudoku_hint_engine.dart';
 import '../../../history/data/history_storage.dart';
 import '../../../history/domain/completed_game.dart';
 import '../../../daily_challenge/data/daily_challenge_storage.dart';
-
 
 final gameControllerProvider =
     StateNotifierProvider<GameController, GameBoard>((ref) {
@@ -21,9 +21,124 @@ class GameController extends StateNotifier<GameBoard> {
   final GameStorage _storage = GameStorage();
   final HistoryStorage _historyStorage = HistoryStorage();
   final DailyChallengeStorage _dailyChallengeStorage = DailyChallengeStorage();
-  Timer? _timer;
 
+  Timer? _timer;
   bool _initialized = false;
+
+  void ensureInitialized() {
+    if (_initialized) return;
+    _initialized = true;
+
+    final savedGame = _storage.loadGame();
+
+    if (savedGame != null) {
+      state = savedGame;
+    } else {
+      state = SudokuGenerator().generate(Difficulty.easy);
+      _saveGame();
+    }
+
+    _startTimer();
+  }
+
+  Future<void> _saveGame() async {
+    await _storage.saveGame(state);
+  }
+
+  String _buildChallengeId(DateTime date) {
+    final y = date.year.toString().padLeft(4, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
+    return '$y$m$d';
+  }
+
+  void newGame(Difficulty difficulty) {
+    ensureInitialized();
+    state = SudokuGenerator().generate(difficulty).copyWith(
+      activeHint: null,
+    );
+    _startTimer();
+    _saveGame();
+  }
+
+  bool openDailyChallenge() {
+    final today = DateTime.now();
+
+    if (isDailyChallengeCompletedForDate(today)) {
+      return false;
+    }
+
+    return openDailyChallengeForDate(today);
+  }
+
+  bool openDailyChallengeForDate(DateTime date) {
+    ensureInitialized();
+
+    final challengeId = _buildChallengeId(date);
+    final savedGame = _storage.loadGame();
+
+    if (savedGame != null &&
+        savedGame.isDailyChallenge &&
+        savedGame.dailyChallengeId == challengeId &&
+        !savedGame.isFinished) {
+      state = savedGame.copyWith(activeHint: null);
+      _startTimer();
+      _saveGame();
+      return true;
+    }
+
+    final seed = int.parse(challengeId);
+
+    state = SudokuGenerator(seed: seed).generate(
+      Difficulty.expert,
+      isDailyChallenge: true,
+      dailyChallengeId: challengeId,
+    ).copyWith(
+      activeHint: null,
+    );
+
+    _startTimer();
+    _saveGame();
+    return true;
+  }
+
+  bool isTodayDailyChallengeCompleted() {
+    final challengeId = _buildChallengeId(DateTime.now());
+    return _dailyChallengeStorage.isCompletedFor(challengeId);
+  }
+
+  bool isDailyChallengeCompletedForDate(DateTime date) {
+    final challengeId = _buildChallengeId(date);
+    return _dailyChallengeStorage.isCompletedFor(challengeId);
+  }
+
+  void restartCurrentGame() {
+    ensureInitialized();
+
+    if (state.isSurrendered) {
+      return;
+    }
+
+    if (state.isDailyChallenge && state.dailyChallengeId != null) {
+      final challengeId = state.dailyChallengeId!;
+      final seed = int.parse(challengeId);
+
+      state = SudokuGenerator(seed: seed).generate(
+        Difficulty.expert,
+        isDailyChallenge: true,
+        dailyChallengeId: challengeId,
+      ).copyWith(
+        activeHint: null,
+      );
+    } else {
+      state = SudokuGenerator().generate(state.difficulty).copyWith(
+        activeHint: null,
+      );
+    }
+
+    _startTimer();
+    _saveGame();
+  }
 
   void surrenderGame() {
     if (state.isFinished) return;
@@ -56,80 +171,9 @@ class GameController extends StateNotifier<GameBoard> {
       isSurrendered: true,
       selectedRow: null,
       selectedCol: null,
+      activeHint: null,
     );
-    _saveGame();
-  }
 
-  void ensureInitialized() {
-    if (_initialized) return;
-    _initialized = true;
-
-    final savedGame = _storage.loadGame();
-
-    if (savedGame != null) {
-      state = savedGame;
-    } else {
-      state = SudokuGenerator().generate(Difficulty.easy);
-      _saveGame();
-    }
-
-    _startTimer();
-  }
-
-  Future<void> _saveGame() async {
-    await _storage.saveGame(state);
-  }
-
-  void newGame(Difficulty difficulty) {
-    ensureInitialized();
-    state = SudokuGenerator().generate(difficulty);
-    _startTimer();
-    _saveGame();
-  }
-
-  String _buildChallengeId(DateTime date) {
-    final y = date.year.toString().padLeft(4, '0');
-    final m = date.month.toString().padLeft(2, '0');
-    final d = date.day.toString().padLeft(2, '0');
-    return '$y$m$d';
-  }
-
-  bool isTodayDailyChallengeCompleted() {
-    final challengeId = _buildChallengeId(DateTime.now());
-    return _dailyChallengeStorage.isCompletedFor(challengeId);
-  }
-
-    bool openDailyChallenge() {
-    final today = DateTime.now();
-
-    if (isDailyChallengeCompletedForDate(today)) {
-      return false;
-    }
-
-    return openDailyChallengeForDate(today);
-  }
-
-  void restartCurrentGame() {
-    ensureInitialized();
-
-    if (state.isSurrendered) {
-      return;
-    }
-
-    if (state.isDailyChallenge && state.dailyChallengeId != null) {
-      final challengeId = state.dailyChallengeId!;
-      final seed = int.parse(challengeId);
-
-      state = SudokuGenerator(seed: seed).generate(
-        Difficulty.expert,
-        isDailyChallenge: true,
-        dailyChallengeId: challengeId,
-      );
-    } else {
-      state = SudokuGenerator().generate(state.difficulty);
-    }
-
-    _startTimer();
     _saveGame();
   }
 
@@ -232,7 +276,10 @@ class GameController extends StateNotifier<GameBoard> {
         newNotes[row][col].add(number);
       }
 
-      state = state.copyWith(notes: newNotes);
+      state = state.copyWith(
+        notes: newNotes,
+        activeHint: null,
+      );
       _saveGame();
       return;
     }
@@ -251,6 +298,7 @@ class GameController extends StateNotifier<GameBoard> {
       values: newValues,
       notes: newNotes,
       mistakes: isWrong ? state.mistakes + 1 : state.mistakes,
+      activeHint: null,
     );
 
     if (state.limitMistakesEnabled && state.mistakes >= state.maxMistakes) {
@@ -287,7 +335,29 @@ class GameController extends StateNotifier<GameBoard> {
     state = state.copyWith(
       values: newValues,
       notes: newNotes,
+      activeHint: null,
     );
+    _saveGame();
+  }
+
+  bool requestHint() {
+    if (state.isPaused || state.isFinished) return false;
+
+    final hint = SudokuHintEngine().findNextHint(state);
+
+    if (hint == null) {
+      state = state.copyWith(activeHint: null);
+      _saveGame();
+      return false;
+    }
+
+    state = state.copyWith(activeHint: hint);
+    _saveGame();
+    return true;
+  }
+
+  void clearHint() {
+    state = state.copyWith(activeHint: null);
     _saveGame();
   }
 
@@ -406,45 +476,11 @@ class GameController extends StateNotifier<GameBoard> {
     state = state.copyWith(
       isFinished: true,
       isPaused: false,
+      activeHint: null,
     );
     _saveGame();
 
     return true;
-  }
-
-  bool openDailyChallengeForDate(DateTime date) {
-  ensureInitialized();
-
-    final challengeId = _buildChallengeId(date);
-
-    final savedGame = _storage.loadGame();
-
-    if (savedGame != null &&
-        savedGame.isDailyChallenge &&
-        savedGame.dailyChallengeId == challengeId &&
-        !savedGame.isFinished) {
-      state = savedGame;
-      _startTimer();
-      _saveGame();
-      return true;
-    }
-
-    final seed = int.parse(challengeId);
-
-    state = SudokuGenerator(seed: seed).generate(
-      Difficulty.expert,
-      isDailyChallenge: true,
-      dailyChallengeId: challengeId,
-    );
-
-    _startTimer();
-    _saveGame();
-    return true;
-  }
-
-  bool isDailyChallengeCompletedForDate(DateTime date) {
-    final challengeId = _buildChallengeId(date);
-    return _dailyChallengeStorage.isCompletedFor(challengeId);
   }
 
   String formattedElapsed() {

@@ -9,6 +9,7 @@ import '../widgets/sudoku_grid.dart';
 import '../widgets/game_stats_header.dart';
 import 'game_result_page.dart';
 import '../../../settings/presentation/settings_page.dart';
+import '../widgets/hint_banner.dart';
 
 class GamePage extends ConsumerStatefulWidget {
   final Difficulty? startDifficulty;
@@ -189,8 +190,32 @@ class _GamePageState extends ConsumerState<GamePage> {
                             builder: (_) => const GameSettingsSheet(),
                           );
                         },
+                        onHint:() {
+                          final found = ref.read(gameControllerProvider.notifier).requestHint();
+
+                          if (!found) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('No se han encontrado pistas disponibles.'),
+                              ),
+                            );
+                          }
+                        },
                       ),
                     ),
+
+                    if (board.activeHint != null) ...[
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: HintBanner(
+                          hint: board.activeHint!,
+                          onClose: () {
+                            ref.read(gameControllerProvider.notifier).clearHint();
+                          },
+                        ),
+                      ),
+                    ],
 
                     const SizedBox(height: 14),
 

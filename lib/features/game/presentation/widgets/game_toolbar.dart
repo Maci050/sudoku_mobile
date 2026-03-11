@@ -7,6 +7,7 @@ class GameToolbar extends StatelessWidget {
   final VoidCallback onErase;
   final VoidCallback onOpenSettings;
   final VoidCallback onSurrender;
+  final VoidCallback onHint;
 
   const GameToolbar({
     super.key,
@@ -16,6 +17,7 @@ class GameToolbar extends StatelessWidget {
     required this.onErase,
     required this.onOpenSettings,
     required this.onSurrender,
+    required this.onHint,
   });
 
   @override
@@ -48,6 +50,11 @@ class GameToolbar extends StatelessWidget {
           icon: Icons.tune_rounded,
           label: 'Ayudas',
           onTap: onOpenSettings,
+        ),
+        _ToolButton(
+          icon: Icons.lightbulb_outline,
+          label: 'Pista',
+          onTap: onHint,
         ),
       ],
     );

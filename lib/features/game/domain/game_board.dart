@@ -1,4 +1,5 @@
 import 'difficulty.dart';
+import 'hint_step.dart';
 
 class GameBoard {
   final List<List<int?>> values;
@@ -25,6 +26,8 @@ class GameBoard {
   final bool highlightRegions;
   final bool highlightSameNumbers;
 
+  final HintStep? activeHint;
+
   const GameBoard({
     required this.values,
     required this.fixedCells,
@@ -48,6 +51,7 @@ class GameBoard {
     this.selectedRow,
     this.selectedCol,
     this.notesMode = false,
+    required this.activeHint,
   });
 
   GameBoard copyWith({
@@ -73,6 +77,7 @@ class GameBoard {
     int? selectedRow,
     int? selectedCol,
     bool? notesMode,
+    HintStep? activeHint,
   }) {
     return GameBoard(
       values: values ?? this.values,
@@ -97,6 +102,7 @@ class GameBoard {
       selectedRow: selectedRow ?? this.selectedRow,
       selectedCol: selectedCol ?? this.selectedCol,
       notesMode: notesMode ?? this.notesMode,
+      activeHint: activeHint ?? this.activeHint,
     );
   }
 
@@ -131,6 +137,7 @@ class GameBoard {
       hideUsedNumbers: true,
       highlightRegions: true,
       highlightSameNumbers: true,
+      activeHint: null,
     );
   }
 
@@ -155,6 +162,7 @@ class GameBoard {
       hideUsedNumbers: true,
       highlightRegions: true,
       highlightSameNumbers: true,
+      activeHint: null,
     );
   }
 
@@ -182,6 +190,7 @@ class GameBoard {
       'hideUsedNumbers': hideUsedNumbers,
       'highlightRegions': highlightRegions,
       'highlightSameNumbers': highlightSameNumbers,
+      'activeHint': activeHint?.toMap(),
     };
   }
 
@@ -225,6 +234,9 @@ class GameBoard {
       hideUsedNumbers: map['hideUsedNumbers'] as bool? ?? true,
       highlightRegions: map['highlightRegions'] as bool? ?? true,
       highlightSameNumbers: map['highlightSameNumbers'] as bool? ?? true,
+      activeHint: map['activeHint'] != null
+          ? HintStep.fromMap(map['activeHint'] as Map)
+          : null,
     );
   }
 }
