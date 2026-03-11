@@ -69,8 +69,8 @@ const sudokuTips = [
     text:
         'Cuando un número aparece exactamente en dos posiciones en dos filas y forma un rectángulo, se puede eliminar ese candidato en otras casillas de las columnas implicadas.',
     assetImages: [
-      'assets/tips/x_wing_1.png',
       'assets/tips/x_wing_2.png',
+      'assets/tips/x_wing_1.png',
     ],
   ),
   SudokuTip(
