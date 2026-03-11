@@ -22,10 +22,8 @@ class ActivityStorage {
     final todayKey = today.toIso8601String();
 
     final dates = loadActivityDates();
+    dates.add(todayKey);
 
-    if (!dates.contains(todayKey)) {
-      dates.add(todayKey);
-      await saveActivityDates(dates);
-    }
+    await saveActivityDates(dates);
   }
 }

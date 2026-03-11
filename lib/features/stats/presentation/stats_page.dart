@@ -44,10 +44,13 @@ class StatsPage extends StatelessWidget {
     final unlockedAchievements =
         AchievementService().loadUnlockedAchievements().length;
     final activityDates = ActivityStorage().loadActivityDates();
-    final activeDays = activityDates
-        .map((e) => DateTime.parse(e))
-        .map((d) => DateTime(d.year, d.month, d.day))
-        .toSet();
+    
+    final activityCounts = <DateTime, int>{};
+    for (final rawDate in activityDates) {
+      final date = DateTime.parse(rawDate);
+      final normalized = DateTime(date.year, date.month, date.day);
+      activityCounts[normalized] = (activityCounts[normalized] ?? 0) + 1;
+    }
 
     final completedGames = history
         .where((g) => g.status == GameResultStatus.completed)
@@ -153,7 +156,7 @@ class StatsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          ActivityCalendar(activeDays: activeDays),
+          ActivityCalendar(activityCounts: activityCounts),
           const SizedBox(height: 24),
           _SectionTitle(title: 'Partidas'),
           _StatCard(
