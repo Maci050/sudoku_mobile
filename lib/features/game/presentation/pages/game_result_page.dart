@@ -6,6 +6,7 @@ import '../../../home/presentation/home_page.dart';
 import '../../../streak/domain/streak_service.dart';
 import '../../domain/difficulty.dart';
 import '../../../activity/data/activity_storage.dart';
+import '../../../settings/data/settings_storage.dart';
 
 class GameResultPage extends StatefulWidget {
   final bool won;
@@ -47,9 +48,13 @@ class _GameResultPageState extends State<GameResultPage>
   void initState() {
     super.initState();
 
+    final settings = SettingsStorage().loadSettings();
+
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 650),
+      duration: settings.animationsEnabled
+          ? const Duration(milliseconds: 800)
+          : Duration.zero,
     );
 
     _fadeAnimation = CurvedAnimation(
@@ -68,13 +73,17 @@ class _GameResultPageState extends State<GameResultPage>
     );
 
     _confettiController = ConfettiController(
-      duration: const Duration(seconds: 2),
+      duration: settings.animationsEnabled
+          ? const Duration(seconds: 2)
+          : Duration.zero,
     );
 
     _controller.forward();
 
     if (widget.won) {
-      _confettiController.play();
+      if (settings.animationsEnabled) {
+        _confettiController.play();
+      }
       FeedbackService.vibrateWin();
 
       WidgetsBinding.instance.addPostFrameCallback((_) {

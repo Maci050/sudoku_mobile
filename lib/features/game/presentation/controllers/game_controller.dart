@@ -342,7 +342,7 @@ class GameController extends StateNotifier<GameBoard> {
     _saveGame();
   }
 
-  bool requestHint() {
+  bool requestHint({bool autoSelect = false}) {
     if (state.isPaused || state.isFinished) return false;
 
     final hint = SudokuHintEngine().findNextHint(state);
@@ -353,8 +353,18 @@ class GameController extends StateNotifier<GameBoard> {
       return false;
     }
 
+    int? selectedRow = state.selectedRow;
+    int? selectedCol = state.selectedCol;
+
+    if (autoSelect && hint.focusCells.isNotEmpty) {
+      selectedRow = hint.focusCells.first.row;
+      selectedCol = hint.focusCells.first.col;
+    }
+
     state = state.copyWith(
       activeHint: hint,
+      selectedRow: selectedRow,
+      selectedCol: selectedCol,
       hintsUsed: state.hintsUsed + 1,
     );
 

@@ -10,6 +10,8 @@ import '../widgets/game_stats_header.dart';
 import 'game_result_page.dart';
 import '../../../settings/presentation/settings_page.dart';
 import '../widgets/hint_banner.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
+import '../../../settings/presentation/settings_controller.dart';
 
 class GamePage extends ConsumerStatefulWidget {
   final Difficulty? startDifficulty;
@@ -25,7 +27,8 @@ class GamePage extends ConsumerStatefulWidget {
   ConsumerState<GamePage> createState() => _GamePageState();
 }
 
-class _GamePageState extends ConsumerState<GamePage> {
+class _GamePageState extends ConsumerState<GamePage> 
+    with WidgetsBindingObserver {
   bool _initialized = false;
 
   @override
@@ -56,6 +59,13 @@ class _GamePageState extends ConsumerState<GamePage> {
   }
 
   Future<void> _confirmSurrender(BuildContext context) async {
+    final settings = ref.read(settingsControllerProvider);
+
+    if (!settings.confirmBeforeSurrender) {
+      ref.read(gameControllerProvider.notifier).surrenderGame();
+      return;
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -82,9 +92,43 @@ class _GamePageState extends ConsumerState<GamePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    WakelockPlus.disable();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive || state == AppLifecycleState.detached) {
+      ref.read(gameControllerProvider.notifier).pauseGame();
+      WakelockPlus.disable();
+    }
+  }
+
+  Future<void> _applyWakelock(bool enable) async {
+    if (enable) {
+      await WakelockPlus.enable();
+    } else {
+      await WakelockPlus.disable();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final board = ref.watch(gameControllerProvider);
     final controller = ref.read(gameControllerProvider.notifier);
+    final settings = ref.watch(settingsControllerProvider);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _applyWakelock(settings.keepScreenOn && !board.isPaused && !board.isFinished);
+    });
 
     return PopScope(
       canPop: true,
@@ -128,7 +172,7 @@ class _GamePageState extends ConsumerState<GamePage> {
                       progress: _filledCells(board.values),
                       difficultyLabel:
                           board.isDailyChallenge ? 'Diario' : board.difficulty.label,
-                      timeText: controller.formattedElapsed(),
+                      timeText: settings.showTimer ? controller.formattedElapsed() : '--:--',
                       isPaused: board.isPaused,
                       mistakesText: board.limitMistakesEnabled
                           ? '${board.mistakes}/${board.maxMistakes}'
@@ -161,9 +205,7 @@ class _GamePageState extends ConsumerState<GamePage> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: GameToolbar(
                         notesMode: board.notesMode,
-                        onNewGame: () {
-                          ref.read(gameControllerProvider.notifier).restartCurrentGame();
-
+                        onNewGame: () async {
                           if (board.isSurrendered) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -172,6 +214,34 @@ class _GamePageState extends ConsumerState<GamePage> {
                                 ),
                               ),
                             );
+                            return;
+                          }
+                          final shouldRestart = settings.confirmBeforeRestart
+                              ? await showDialog<bool>(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                    title: const Text('¿Reiniciar partida?'),
+                                    content: const Text(
+                                      '¿Estás seguro de que quieres reiniciar esta partida? Se perderá el progreso actual.',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                        child: const Text('Cancelar'),
+                                      ),
+                                      FilledButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, true),
+                                        child: const Text('Reiniciar'),
+                                      ),
+                                    ],
+                                  ),
+                                ) ??
+                                  false
+                              : true;
+                          if (shouldRestart == true) {
+                            ref.read(gameControllerProvider.notifier).restartCurrentGame();
                           }
                         },
                         onSurrender: () {
@@ -191,7 +261,9 @@ class _GamePageState extends ConsumerState<GamePage> {
                           );
                         },
                         onHint:() {
-                          final found = ref.read(gameControllerProvider.notifier).requestHint();
+                          final found = ref.read(gameControllerProvider.notifier).requestHint(
+                            autoSelect: settings.autoSelectHintCell,
+                          );
 
                           if (!found) {
                             ScaffoldMessenger.of(context).showSnackBar(

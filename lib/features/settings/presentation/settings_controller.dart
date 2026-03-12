@@ -22,23 +22,43 @@ class SettingsController extends StateNotifier<AppSettings> {
     await _storage.saveSettings(state);
   }
 
-  void toggleVibration(bool value) {
+  void setVibrationEnabled(bool value) {
     state = state.copyWith(vibrationEnabled: value);
     _save();
   }
 
-  void toggleAnimations(bool value) {
+  void setAnimationsEnabled(bool value) {
     state = state.copyWith(animationsEnabled: value);
     _save();
   }
 
-  void toggleKeepScreenOn(bool value) {
+  void setKeepScreenOn(bool value) {
     state = state.copyWith(keepScreenOn: value);
     _save();
   }
 
-  void setThemeMode(AppThemeMode mode) {
-    state = state.copyWith(themeMode: mode);
+  void setShowTimer(bool value) {
+    state = state.copyWith(showTimer: value);
+    _save();
+  }
+
+  void setConfirmBeforeRestart(bool value) {
+    state = state.copyWith(confirmBeforeRestart: value);
+    _save();
+  }
+
+  void setConfirmBeforeSurrender(bool value) {
+    state = state.copyWith(confirmBeforeSurrender: value);
+    _save();
+  }
+
+  void setAutoSelectHintCell(bool value) {
+    state = state.copyWith(autoSelectHintCell: value);
+    _save();
+  }
+
+  void setThemeMode(AppThemeModeSetting value) {
+    state = state.copyWith(themeMode: value);
     _save();
   }
 }

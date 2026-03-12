@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'features/home/presentation/home_page.dart';
@@ -24,6 +23,7 @@ class SudokuApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Sudoku',
       debugShowCheckedModeBanner: false,
+      themeMode: settings.themeMode.flutterThemeMode,
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
@@ -34,29 +34,7 @@ class SudokuApp extends ConsumerWidget {
         colorSchemeSeed: Colors.blue,
         brightness: Brightness.dark,
       ),
-      themeMode: _mapThemeMode(settings.themeMode),
-      locale: const Locale('es'),
-      supportedLocales: const [
-        Locale('es'),
-        Locale('en'),
-      ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
       home: const HomePage(),
     );
-  }
-
-  ThemeMode _mapThemeMode(AppThemeMode mode) {
-    switch (mode) {
-      case AppThemeMode.system:
-        return ThemeMode.system;
-      case AppThemeMode.light:
-        return ThemeMode.light;
-      case AppThemeMode.dark:
-        return ThemeMode.dark;
-    }
   }
 }

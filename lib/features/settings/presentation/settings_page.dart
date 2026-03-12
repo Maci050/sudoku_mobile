@@ -18,18 +18,18 @@ class SettingsPage extends ConsumerWidget {
       ),
       body: ListView(
         children: [
-          const SizedBox(height: 8),
+          const _SectionHeader(title: 'Juego'),
           SwitchListTile(
             title: const Text('Vibración'),
             subtitle: const Text('Respuesta háptica al interactuar'),
             value: settings.vibrationEnabled,
-            onChanged: controller.toggleVibration,
+            onChanged: controller.setVibrationEnabled,
           ),
           SwitchListTile(
             title: const Text('Animaciones'),
             subtitle: const Text('Activar transiciones y efectos visuales'),
             value: settings.animationsEnabled,
-            onChanged: controller.toggleAnimations,
+            onChanged: controller.setAnimationsEnabled,
           ),
           SwitchListTile(
             title: const Text('Mantener pantalla encendida'),
@@ -37,48 +37,80 @@ class SettingsPage extends ConsumerWidget {
               'Evita que la pantalla se apague durante la partida',
             ),
             value: settings.keepScreenOn,
-            onChanged: controller.toggleKeepScreenOn,
+            onChanged: controller.setKeepScreenOn,
           ),
-          const Divider(),
+          SwitchListTile(
+            title: const Text('Mostrar temporizador'),
+            subtitle: const Text('Muestra el tiempo durante la partida'),
+            value: settings.showTimer,
+            onChanged: controller.setShowTimer,
+          ),
+          SwitchListTile(
+            title: const Text('Confirmar antes de reiniciar'),
+            subtitle: const Text('Pide confirmación antes de reiniciar'),
+            value: settings.confirmBeforeRestart,
+            onChanged: controller.setConfirmBeforeRestart,
+          ),
+          SwitchListTile(
+            title: const Text('Confirmar antes de rendirse'),
+            subtitle: const Text('Pide confirmación antes de mostrar la solución'),
+            value: settings.confirmBeforeSurrender,
+            onChanged: controller.setConfirmBeforeSurrender,
+          ),
+          const _SectionHeader(title: 'Ayudas'),
+          SwitchListTile(
+            title: const Text('Seleccionar casilla al pedir pista'),
+            subtitle: const Text(
+              'Selecciona automáticamente la casilla importante de la pista',
+            ),
+            value: settings.autoSelectHintCell,
+            onChanged: controller.setAutoSelectHintCell,
+          ),
+          const _SectionHeader(title: 'Visual'),
           ListTile(
             title: const Text('Tema'),
-            subtitle: Text(_themeLabel(settings.themeMode)),
-            trailing: DropdownButton<AppThemeMode>(
+            subtitle: Text(settings.themeMode.label),
+            trailing: DropdownButton<AppThemeModeSetting>(
               value: settings.themeMode,
+              underline: const SizedBox.shrink(),
               onChanged: (value) {
                 if (value != null) {
                   controller.setThemeMode(value);
                 }
               },
-              items: const [
-                DropdownMenuItem(
-                  value: AppThemeMode.system,
-                  child: Text('Sistema'),
-                ),
-                DropdownMenuItem(
-                  value: AppThemeMode.light,
-                  child: Text('Claro'),
-                ),
-                DropdownMenuItem(
-                  value: AppThemeMode.dark,
-                  child: Text('Oscuro'),
-                ),
-              ],
+              items: AppThemeModeSetting.values
+                  .map(
+                    (mode) => DropdownMenuItem(
+                      value: mode,
+                      child: Text(mode.label),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  static String _themeLabel(AppThemeMode mode) {
-    switch (mode) {
-      case AppThemeMode.system:
-        return 'Seguir configuración del sistema';
-      case AppThemeMode.light:
-        return 'Tema claro';
-      case AppThemeMode.dark:
-        return 'Tema oscuro';
-    }
+class _SectionHeader extends StatelessWidget {
+  final String title;
+
+  const _SectionHeader({
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+      ),
+    );
   }
 }
