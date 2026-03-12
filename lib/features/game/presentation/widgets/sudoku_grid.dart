@@ -14,6 +14,7 @@ class SudokuGrid extends ConsumerWidget {
       aspectRatio: 1,
       child: Container(
         decoration: BoxDecoration(
+          color: Colors.white,
           border: Border.all(color: Colors.black, width: 2),
         ),
         child: Column(
@@ -32,15 +33,15 @@ class SudokuGrid extends ConsumerWidget {
                   final hint = board.activeHint;
 
                   final isHintFocus = hint?.focusCells.any(
-                    (cell) => cell.row == row && cell.col == col
-                  ) ??
-                  false;
+                        (cell) => cell.row == row && cell.col == col,
+                      ) ??
+                      false;
 
                   final isHintRelated = hint?.relatedCells.any(
-                    (cell) => cell.row == row && cell.col == col
-                  ) ??
-                  false;
-                  
+                        (cell) => cell.row == row && cell.col == col,
+                      ) ??
+                      false;
+
                   Color backgroundColor = Colors.white;
 
                   if (isHighlighted) {
@@ -65,12 +66,12 @@ class SudokuGrid extends ConsumerWidget {
                     backgroundColor = Colors.blue.withValues(alpha: 0.20);
                   }
 
-                  
-
                   return Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        ref.read(gameControllerProvider.notifier).selectCell(row, col);
+                        ref
+                            .read(gameControllerProvider.notifier)
+                            .selectCell(row, col);
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -100,9 +101,12 @@ class SudokuGrid extends ConsumerWidget {
                                   '$value',
                                   style: TextStyle(
                                     fontSize: 24,
-                                    fontWeight:
-                                        isFixed ? FontWeight.bold : FontWeight.w500,
-                                    color: isFixed ? Colors.black : Colors.blue[800],
+                                    fontWeight: isFixed
+                                        ? FontWeight.bold
+                                        : FontWeight.w500,
+                                    color: isFixed
+                                        ? Colors.black
+                                        : Colors.blue[800],
                                   ),
                                 )
                               : _NotesView(notes: notes),
@@ -137,7 +141,10 @@ class _NotesView extends StatelessWidget {
           return Center(
             child: Text(
               notes.contains(number) ? '$number' : '',
-              style: const TextStyle(fontSize: 10, color: Colors.grey),
+              style: const TextStyle(
+                fontSize: 10,
+                color: Colors.grey,
+              ),
             ),
           );
         }),
