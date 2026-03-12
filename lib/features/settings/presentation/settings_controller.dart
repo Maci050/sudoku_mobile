@@ -42,11 +42,6 @@ class SettingsController extends StateNotifier<AppSettings> {
     _save();
   }
 
-  void setConfirmBeforeRestart(bool value) {
-    state = state.copyWith(confirmBeforeRestart: value);
-    _save();
-  }
-
   void setConfirmBeforeSurrender(bool value) {
     state = state.copyWith(confirmBeforeSurrender: value);
     _save();

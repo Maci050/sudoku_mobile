@@ -205,45 +205,6 @@ class _GamePageState extends ConsumerState<GamePage>
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: GameToolbar(
                         notesMode: board.notesMode,
-                        onNewGame: () async {
-                          if (board.isSurrendered) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Esta partida quedó rendida. Empieza una nueva desde el inicio.',
-                                ),
-                              ),
-                            );
-                            return;
-                          }
-                          final shouldRestart = settings.confirmBeforeRestart
-                              ? await showDialog<bool>(
-                                  context: context,
-                                  builder: (_) => AlertDialog(
-                                    title: const Text('¿Reiniciar partida?'),
-                                    content: const Text(
-                                      '¿Estás seguro de que quieres reiniciar esta partida? Se perderá el progreso actual.',
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context, false),
-                                        child: const Text('Cancelar'),
-                                      ),
-                                      FilledButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context, true),
-                                        child: const Text('Reiniciar'),
-                                      ),
-                                    ],
-                                  ),
-                                ) ??
-                                  false
-                              : true;
-                          if (shouldRestart == true) {
-                            ref.read(gameControllerProvider.notifier).restartCurrentGame();
-                          }
-                        },
                         onSurrender: () {
                           _confirmSurrender(context);
                         },

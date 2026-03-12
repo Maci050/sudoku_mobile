@@ -46,12 +46,6 @@ class SettingsPage extends ConsumerWidget {
             onChanged: controller.setShowTimer,
           ),
           SwitchListTile(
-            title: const Text('Confirmar antes de reiniciar'),
-            subtitle: const Text('Pide confirmación antes de reiniciar'),
-            value: settings.confirmBeforeRestart,
-            onChanged: controller.setConfirmBeforeRestart,
-          ),
-          SwitchListTile(
             title: const Text('Confirmar antes de rendirse'),
             subtitle: const Text('Pide confirmación antes de mostrar la solución'),
             value: settings.confirmBeforeSurrender,

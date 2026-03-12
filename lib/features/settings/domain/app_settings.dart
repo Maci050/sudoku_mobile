@@ -35,7 +35,6 @@ class AppSettings {
   final bool animationsEnabled;
   final bool keepScreenOn;
   final bool showTimer;
-  final bool confirmBeforeRestart;
   final bool confirmBeforeSurrender;
   final bool autoSelectHintCell;
   final AppThemeModeSetting themeMode;
@@ -45,7 +44,6 @@ class AppSettings {
     required this.animationsEnabled,
     required this.keepScreenOn,
     required this.showTimer,
-    required this.confirmBeforeRestart,
     required this.confirmBeforeSurrender,
     required this.autoSelectHintCell,
     required this.themeMode,
@@ -56,7 +54,6 @@ class AppSettings {
     bool? animationsEnabled,
     bool? keepScreenOn,
     bool? showTimer,
-    bool? confirmBeforeRestart,
     bool? confirmBeforeSurrender,
     bool? autoSelectHintCell,
     AppThemeModeSetting? themeMode,
@@ -66,7 +63,6 @@ class AppSettings {
       animationsEnabled: animationsEnabled ?? this.animationsEnabled,
       keepScreenOn: keepScreenOn ?? this.keepScreenOn,
       showTimer: showTimer ?? this.showTimer,
-      confirmBeforeRestart: confirmBeforeRestart ?? this.confirmBeforeRestart,
       confirmBeforeSurrender:
           confirmBeforeSurrender ?? this.confirmBeforeSurrender,
       autoSelectHintCell: autoSelectHintCell ?? this.autoSelectHintCell,
@@ -80,7 +76,6 @@ class AppSettings {
       animationsEnabled: true,
       keepScreenOn: false,
       showTimer: true,
-      confirmBeforeRestart: true,
       confirmBeforeSurrender: true,
       autoSelectHintCell: true,
       themeMode: AppThemeModeSetting.system,
@@ -93,7 +88,6 @@ class AppSettings {
       'animationsEnabled': animationsEnabled,
       'keepScreenOn': keepScreenOn,
       'showTimer': showTimer,
-      'confirmBeforeRestart': confirmBeforeRestart,
       'confirmBeforeSurrender': confirmBeforeSurrender,
       'autoSelectHintCell': autoSelectHintCell,
       'themeMode': themeMode.name,
@@ -114,7 +108,6 @@ class AppSettings {
       animationsEnabled: map['animationsEnabled'] as bool? ?? true,
       keepScreenOn: map['keepScreenOn'] as bool? ?? false,
       showTimer: map['showTimer'] as bool? ?? true,
-      confirmBeforeRestart: map['confirmBeforeRestart'] as bool? ?? true,
       confirmBeforeSurrender: map['confirmBeforeSurrender'] as bool? ?? true,
       autoSelectHintCell: map['autoSelectHintCell'] as bool? ?? true,
       themeMode: parsedThemeMode(),
