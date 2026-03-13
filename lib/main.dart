@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'features/home/presentation/home_page.dart';
@@ -34,6 +35,15 @@ class SudokuApp extends ConsumerWidget {
         colorSchemeSeed: Colors.blue,
         brightness: Brightness.dark,
       ),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es'), 
+        Locale('en')
+      ],
       home: const HomePage(),
     );
   }
