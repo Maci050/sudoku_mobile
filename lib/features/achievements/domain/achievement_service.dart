@@ -63,26 +63,44 @@ class AchievementService {
 
     final completedTraining = _trainingProgressStorage.loadCompletedLevels();
 
-    final basicLevels = trainingLevels
-        .where((level) => level.difficulty == TrainingDifficulty.basic)
+    final nakedSingleLevels = trainingLevels
+        .where((level) => level.skill == TrainingSkill.nakedSingle)
         .toList();
-    final intermediateLevels = trainingLevels
-        .where((level) => level.difficulty == TrainingDifficulty.intermediate)
+    final hiddenSingleLevels = trainingLevels
+        .where((level) => level.skill == TrainingSkill.hiddenSingle)
         .toList();
-    final advancedLevels = trainingLevels
-        .where((level) => level.difficulty == TrainingDifficulty.advanced)
+    final nakedPairLevels = trainingLevels
+        .where((level) => level.skill == TrainingSkill.nakedPair)
+        .toList();
+    final hiddenPairLevels = trainingLevels
+        .where((level) => level.skill == TrainingSkill.hiddenPair)
+        .toList();
+    final pointingPairLevels = trainingLevels
+        .where((level) => level.skill == TrainingSkill.pointingPair)
+        .toList();
+    final boxLineLevels = trainingLevels
+        .where((level) => level.skill == TrainingSkill.boxLineReduction)
         .toList();
 
     final allTrainingLevels = trainingLevels.map((level) => level.id).toList();
 
-    final basicCompleted = basicLevels.isNotEmpty &&
-        basicLevels.every((level) => completedTraining.contains(level.id));
+    final nakedSingleCompleted = nakedSingleLevels.isNotEmpty &&
+        nakedSingleLevels.every((level) => completedTraining.contains(level.id));
 
-    final intermediateCompleted = intermediateLevels.isNotEmpty &&
-        intermediateLevels.every((level) => completedTraining.contains(level.id));
+    final hiddenSingleCompleted = hiddenSingleLevels.isNotEmpty &&
+        hiddenSingleLevels.every((level) => completedTraining.contains(level.id));
 
-    final advancedCompleted = advancedLevels.isNotEmpty &&
-        advancedLevels.every((level) => completedTraining.contains(level.id));
+    final nakedPairCompleted = nakedPairLevels.isNotEmpty &&
+        nakedPairLevels.every((level) => completedTraining.contains(level.id));
+
+    final hiddenPairCompleted = hiddenPairLevels.isNotEmpty &&
+        hiddenPairLevels.every((level) => completedTraining.contains(level.id));
+
+    final pointingPairCompleted = pointingPairLevels.isNotEmpty &&
+        pointingPairLevels.every((level) => completedTraining.contains(level.id));
+
+    final boxLineCompleted = boxLineLevels.isNotEmpty &&
+        boxLineLevels.every((level) => completedTraining.contains(level.id));
 
     final allTrainingCompleted = allTrainingLevels.isNotEmpty &&
         allTrainingLevels.every((id) => completedTraining.contains(id));
@@ -133,11 +151,13 @@ class AchievementService {
 
     if (perfectGames >= 1) unlock(AchievementId.perfectRun);
 
-    if (basicCompleted) unlock(AchievementId.trainingBasicCompleted);
-    if (intermediateCompleted) {
+    if (nakedSingleCompleted) unlock(AchievementId.trainingBasicCompleted);
+    if (hiddenSingleCompleted && nakedPairCompleted && hiddenPairCompleted) {
       unlock(AchievementId.trainingIntermediateCompleted);
     }
-    if (advancedCompleted) unlock(AchievementId.trainingAdvancedCompleted);
+    if (pointingPairCompleted && boxLineCompleted) {
+      unlock(AchievementId.trainingAdvancedCompleted);
+    }
     if (allTrainingCompleted) unlock(AchievementId.trainingAllCompleted);
 
     await _achievementsStorage.saveUnlockedIds(unlockedIds);

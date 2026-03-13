@@ -7,34 +7,53 @@ import 'training_session_page.dart';
 class TrainingPage extends StatelessWidget {
   const TrainingPage({super.key});
 
-  String _difficultyLabel(TrainingDifficulty difficulty) {
-    switch (difficulty) {
-      case TrainingDifficulty.basic:
-        return 'Básico';
-      case TrainingDifficulty.intermediate:
-        return 'Intermedio';
-      case TrainingDifficulty.advanced:
-        return 'Avanzado';
+  static const List<TrainingSkill> _skillOrder = [
+    TrainingSkill.nakedSingle,
+    TrainingSkill.hiddenSingle,
+    TrainingSkill.nakedPair,
+    TrainingSkill.hiddenPair,
+    TrainingSkill.pointingPair,
+    TrainingSkill.boxLineReduction,
+  ];
+
+  IconData _skillIcon(TrainingSkill skill) {
+    switch (skill) {
+      case TrainingSkill.nakedSingle:
+        return Icons.filter_1_outlined;
+      case TrainingSkill.hiddenSingle:
+        return Icons.visibility_outlined;
+      case TrainingSkill.nakedPair:
+        return Icons.looks_two_outlined;
+      case TrainingSkill.hiddenPair:
+        return Icons.auto_awesome_outlined;
+      case TrainingSkill.pointingPair:
+        return Icons.call_made_outlined;
+      case TrainingSkill.boxLineReduction:
+        return Icons.grid_view_outlined;
     }
   }
 
-  IconData _difficultyIcon(TrainingDifficulty difficulty) {
-    switch (difficulty) {
-      case TrainingDifficulty.basic:
-        return Icons.school_outlined;
-      case TrainingDifficulty.intermediate:
-        return Icons.psychology_outlined;
-      case TrainingDifficulty.advanced:
-        return Icons.workspace_premium_outlined;
-    }
+  bool _isSkillUnlocked(
+    TrainingSkill skill,
+    Map<TrainingSkill, List<TrainingLevel>> grouped,
+    Set<String> completed,
+  ) {
+    final index = _skillOrder.indexOf(skill);
+    if (index <= 0) return true;
+
+    final previousSkill = _skillOrder[index - 1];
+    final previousLevels = grouped[previousSkill] ?? [];
+
+    return previousLevels.isNotEmpty &&
+        previousLevels.every((level) => completed.contains(level.id));
   }
 
   bool _isLevelUnlocked(
     TrainingLevel level,
-    List<TrainingLevel> levelsInGroup,
+    List<TrainingLevel> levelsInSkill,
     Set<String> completed,
   ) {
-    final sorted = [...levelsInGroup]..sort((a, b) => a.order.compareTo(b.order));
+    final sorted = [...levelsInSkill]..sort((a, b) => a.order.compareTo(b.order));
     final index = sorted.indexWhere((l) => l.id == level.id);
 
     if (index <= 0) return true;
@@ -43,46 +62,24 @@ class TrainingPage extends StatelessWidget {
     return completed.contains(previous.id);
   }
 
-  bool _isDifficultyUnlocked(
-    TrainingDifficulty difficulty,
-    Map<TrainingDifficulty, List<TrainingLevel>> grouped,
-    Set<String> completed,
+  String _lockedMessage(
+    TrainingSkill skill,
+    Map<TrainingSkill, List<TrainingLevel>> grouped,
   ) {
-    if (difficulty == TrainingDifficulty.basic) return true;
+    final index = _skillOrder.indexOf(skill);
+    if (index <= 0) return '';
 
-    if (difficulty == TrainingDifficulty.intermediate) {
-      final basicLevels = grouped[TrainingDifficulty.basic] ?? [];
-      return basicLevels.isNotEmpty &&
-          basicLevels.every((level) => completed.contains(level.id));
-    }
-
-    if (difficulty == TrainingDifficulty.advanced) {
-      final intermediateLevels = grouped[TrainingDifficulty.intermediate] ?? [];
-      return intermediateLevels.isNotEmpty &&
-          intermediateLevels.every((level) => completed.contains(level.id));
-    }
-
-    return false;
-  }
-
-  String _lockedMessage(TrainingDifficulty difficulty) {
-    switch (difficulty) {
-      case TrainingDifficulty.basic:
-        return '';
-      case TrainingDifficulty.intermediate:
-        return 'Completa todos los niveles básicos para desbloquear esta categoría.';
-      case TrainingDifficulty.advanced:
-        return 'Completa todos los niveles intermedios para desbloquear esta categoría.';
-    }
+    final previousSkill = _skillOrder[index - 1];
+    return 'Completa todos los ejercicios de ${previousSkill.label} para desbloquear esta sección.';
   }
 
   @override
   Widget build(BuildContext context) {
     final completed = TrainingProgressStorage().loadCompletedLevels();
 
-    final grouped = <TrainingDifficulty, List<TrainingLevel>>{};
+    final grouped = <TrainingSkill, List<TrainingLevel>>{};
     for (final level in trainingLevels) {
-      grouped.putIfAbsent(level.difficulty, () => []).add(level);
+      grouped.putIfAbsent(level.skill, () => []).add(level);
     }
 
     for (final entry in grouped.entries) {
@@ -96,12 +93,10 @@ class TrainingPage extends StatelessWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: TrainingDifficulty.values.map((difficulty) {
-          final levels = grouped[difficulty] ?? [];
-          final difficultyUnlocked =
-              _isDifficultyUnlocked(difficulty, grouped, completed);
-
-          final completedInGroup =
+        children: _skillOrder.map((skill) {
+          final levels = grouped[skill] ?? [];
+          final skillUnlocked = _isSkillUnlocked(skill, grouped, completed);
+          final completedInSkill =
               levels.where((level) => completed.contains(level.id)).length;
 
           return Padding(
@@ -114,24 +109,31 @@ class TrainingPage extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(_difficultyIcon(difficulty)),
+                        Icon(_skillIcon(skill)),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            _difficultyLabel(difficulty),
+                            skill.label,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
                           ),
                         ),
-                        Text('$completedInGroup/${levels.length}'),
+                        Text('$completedInSkill/${levels.length}'),
                       ],
                     ),
-                    if (!difficultyUnlocked) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      skill.shortDescription,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (!skillUnlocked) ...[
                       const SizedBox(height: 10),
                       Text(
-                        _lockedMessage(difficulty),
+                        _lockedMessage(skill, grouped),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -139,8 +141,8 @@ class TrainingPage extends StatelessWidget {
                     ],
                     const SizedBox(height: 12),
                     ...levels.map((level) {
-                      final unlocked = difficultyUnlocked &&
-                          _isLevelUnlocked(level, levels, completed);
+                      final unlocked =
+                          skillUnlocked && _isLevelUnlocked(level, levels, completed);
                       final isCompleted = completed.contains(level.id);
 
                       return ListTile(
@@ -152,7 +154,7 @@ class TrainingPage extends StatelessWidget {
                                   ? Icons.play_circle_outline
                                   : Icons.lock_outline,
                         ),
-                        title: Text('${level.title} · ${level.technique}'),
+                        title: Text(level.title),
                         subtitle: Text(level.objective),
                         trailing: unlocked
                             ? const Icon(Icons.chevron_right)
@@ -165,7 +167,9 @@ class TrainingPage extends StatelessWidget {
                                     builder: (_) => TrainingSessionPage(level: level),
                                   ),
                                 );
+
                                 if (!context.mounted) return;
+
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
@@ -176,7 +180,7 @@ class TrainingPage extends StatelessWidget {
                             : null,
                       );
                     }),
-                    if (completedInGroup == levels.length && levels.isNotEmpty) ...[
+                    if (completedInSkill == levels.length && levels.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.all(10),
@@ -185,7 +189,7 @@ class TrainingPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'Categoría completada 🏅',
+                          'Skill completada',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.onPrimaryContainer,
