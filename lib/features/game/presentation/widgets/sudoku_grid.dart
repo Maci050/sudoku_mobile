@@ -29,6 +29,8 @@ class SudokuGrid extends ConsumerWidget {
                       board.selectedRow == row && board.selectedCol == col;
                   final hasError = controller.isWrongValue(row, col);
                   final hasDuplicate = controller.hasDuplicate(row, col);
+                  final isDuplicateConflictGroup =
+                      controller.isInDuplicateConflictGroup(row, col);
                   final isHighlighted = controller.shouldHighlightCell(row, col);
                   final hint = board.activeHint;
 
@@ -42,14 +44,17 @@ class SudokuGrid extends ConsumerWidget {
                       ) ??
                       false;
 
+                  final hasConflict =
+                      hasError || hasDuplicate || isDuplicateConflictGroup;
+
                   Color backgroundColor = Colors.white;
 
                   if (isHighlighted) {
                     backgroundColor = Colors.blue.withValues(alpha: 0.08);
                   }
 
-                  if (hasDuplicate) {
-                    backgroundColor = Colors.orange.withValues(alpha: 0.18);
+                  if (hasDuplicate || isDuplicateConflictGroup) {
+                    backgroundColor = Colors.red.withValues(alpha: 0.15);
                   }
 
                   if (hasError) {
@@ -62,7 +67,7 @@ class SudokuGrid extends ConsumerWidget {
                     backgroundColor = Colors.amber.withValues(alpha: 0.22);
                   }
 
-                  if (isSelected) {
+                  if (isSelected && !hasConflict) {
                     backgroundColor = Colors.blue.withValues(alpha: 0.20);
                   }
 
@@ -104,9 +109,11 @@ class SudokuGrid extends ConsumerWidget {
                                     fontWeight: isFixed
                                         ? FontWeight.bold
                                         : FontWeight.w500,
-                                    color: isFixed
-                                        ? Colors.black
-                                        : Colors.blue[800],
+                                    color: hasConflict
+                                        ? Colors.red[800]
+                                        : (isFixed
+                                            ? Colors.black
+                                            : Colors.blue[800]),
                                   ),
                                 )
                               : _NotesView(notes: notes),

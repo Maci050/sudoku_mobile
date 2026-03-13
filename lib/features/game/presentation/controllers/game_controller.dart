@@ -466,6 +466,30 @@ Set<int> _calculateCandidatesForCell(int row, int col) {
     return false;
   }
 
+  bool isInDuplicateConflictGroup(int row,int col) {
+    final value = state.values[row][col];
+    if (value == null) return false;
+
+    for (int i = 0; i < 9; i++) {
+      if (i != col && state.values[row][i] == value) return true;
+      if (i != row && state.values[i][col] == value) return true;
+    }
+
+    final startRow = (row ~/ 3) * 3;
+    final startCol = (col ~/ 3) * 3;
+
+    for (int r = startRow; r < startRow + 3; r++) {
+      for (int c = startCol; c < startCol + 3; c++) {
+        if ((r != row || c != col) && state.values[r][c] == value) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+
+  }
+
   bool shouldHighlightCell(int row, int col) {
     final selectedRow = state.selectedRow;
     final selectedCol = state.selectedCol;
