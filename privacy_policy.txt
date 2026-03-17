@@ -1,0 +1,11 @@
+Politica de privacidad
+
+Esta aplicacion no recopila, alamacena ni comparte datos personales de los usuarios
+
+Toda la informacion generada dentro de la aplicacion (como progreso, estadisticas o historial de juego) se guarda unicamente de forma local en el dispositivo del usuario.
+
+La aplicacion no utiliza servicios externos para recopilar informacion personal, ni comparte datos con terceros.
+
+No se recopila informacion como nombre, correo electronico, ubicacion u otros datos personales.
+
+Si en el futuro se añadieran funcionalidades que impliquen el uso de datos, esta politica sera actualizada en consecuencia.
