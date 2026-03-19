@@ -83,6 +83,26 @@ class SettingsPage extends ConsumerWidget {
                   .toList(),
             ),
           ),
+          ListTile(
+            title: const Text('Fondo del tablero'),
+            subtitle: Text(settings.boardTheme.label),
+            trailing: DropdownButton<SudokuBoardTheme>(
+              value: settings.boardTheme,
+              underline: const SizedBox.shrink(),
+              items: SudokuBoardTheme.values.map((theme) {
+                return DropdownMenuItem(
+                  value: theme,
+                  child: Text(theme.label),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value == null) return;
+            
+            ref.read(settingsControllerProvider.notifier).setBoardTheme(value);
+              },
+            ),
+          ),
+
           const _SectionHeader(title: 'Información'),
           ListTile(
             leading: const Icon(Icons.info_outline),

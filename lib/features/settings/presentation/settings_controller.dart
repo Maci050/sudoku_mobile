@@ -56,4 +56,9 @@ class SettingsController extends StateNotifier<AppSettings> {
     state = state.copyWith(themeMode: value);
     _save();
   }
+
+  void setBoardTheme(SudokuBoardTheme value) {
+    state = state.copyWith(boardTheme: value);
+    _save();
+  }
 }

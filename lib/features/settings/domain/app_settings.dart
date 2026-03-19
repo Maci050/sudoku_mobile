@@ -30,6 +30,31 @@ extension AppThemeModeSettingX on AppThemeModeSetting {
   }
 }
 
+enum SudokuBoardTheme {
+  classic,
+  paper,
+  darkBlue,
+  forest,
+  sunset,
+}
+
+extension SudokuBoardThemeX on SudokuBoardTheme {
+  String get label {
+    switch (this) {
+      case SudokuBoardTheme.classic:
+        return 'Clásico';
+      case SudokuBoardTheme.paper:
+        return 'Papel';
+      case SudokuBoardTheme.darkBlue:
+        return 'Azul Oscuro';
+      case SudokuBoardTheme.forest:
+        return 'Bosque';
+      case SudokuBoardTheme.sunset:
+        return 'Atardecer';
+    }
+  }
+}
+
 class AppSettings {
   final bool vibrationEnabled;
   final bool animationsEnabled;
@@ -38,7 +63,7 @@ class AppSettings {
   final bool confirmBeforeSurrender;
   final bool autoSelectHintCell;
   final AppThemeModeSetting themeMode;
-
+  final SudokuBoardTheme boardTheme;
   const AppSettings({
     required this.vibrationEnabled,
     required this.animationsEnabled,
@@ -47,6 +72,7 @@ class AppSettings {
     required this.confirmBeforeSurrender,
     required this.autoSelectHintCell,
     required this.themeMode,
+    required this.boardTheme,
   });
 
   AppSettings copyWith({
@@ -57,6 +83,7 @@ class AppSettings {
     bool? confirmBeforeSurrender,
     bool? autoSelectHintCell,
     AppThemeModeSetting? themeMode,
+    SudokuBoardTheme? boardTheme,
   }) {
     return AppSettings(
       vibrationEnabled: vibrationEnabled ?? this.vibrationEnabled,
@@ -67,6 +94,7 @@ class AppSettings {
           confirmBeforeSurrender ?? this.confirmBeforeSurrender,
       autoSelectHintCell: autoSelectHintCell ?? this.autoSelectHintCell,
       themeMode: themeMode ?? this.themeMode,
+      boardTheme: boardTheme ?? this.boardTheme,
     );
   }
 
@@ -79,6 +107,7 @@ class AppSettings {
       confirmBeforeSurrender: true,
       autoSelectHintCell: true,
       themeMode: AppThemeModeSetting.system,
+      boardTheme: SudokuBoardTheme.classic,
     );
   }
 
@@ -91,6 +120,7 @@ class AppSettings {
       'confirmBeforeSurrender': confirmBeforeSurrender,
       'autoSelectHintCell': autoSelectHintCell,
       'themeMode': themeMode.name,
+      'boardTheme': boardTheme.name,
     };
   }
 
@@ -111,6 +141,10 @@ class AppSettings {
       confirmBeforeSurrender: map['confirmBeforeSurrender'] as bool? ?? true,
       autoSelectHintCell: map['autoSelectHintCell'] as bool? ?? true,
       themeMode: parsedThemeMode(),
+      boardTheme: SudokuBoardTheme.values.firstWhere(
+        (e) => e.name == map['boardTheme'],
+        orElse: () => SudokuBoardTheme.classic,
+      ),
     );
   }
 }
