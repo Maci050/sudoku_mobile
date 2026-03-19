@@ -55,6 +55,61 @@ extension SudokuBoardThemeX on SudokuBoardTheme {
   }
 }
 
+enum AppBackgroundTheme {
+  none,
+  dogs,
+  cats,
+  cuadriculado,
+  forest,
+  japan,
+  space,
+  programming,
+}
+
+extension AppBackgroundThemeX on AppBackgroundTheme {
+  String? get assetPath {
+    switch (this) {
+      case AppBackgroundTheme.none:
+        return null;
+      case AppBackgroundTheme.dogs:
+        return 'assets/fondos/fondo_perro.png';
+      case AppBackgroundTheme.cats:
+        return 'assets/fondos/fondo_gato.png';
+      case AppBackgroundTheme.cuadriculado:
+        return 'assets/fondos/fondo_cuadriculado.png';
+      case AppBackgroundTheme.forest:
+        return 'assets/fondos/fondo_forest.png';
+      case AppBackgroundTheme.japan:
+        return 'assets/fondos/fondo_japon.png';
+      case AppBackgroundTheme.space:
+        return 'assets/fondos/fondo_space.png';
+      case AppBackgroundTheme.programming:
+        return 'assets/fondos/fondo_programming.png';
+    }
+  }
+  
+  String get label {
+    switch (this) {
+      case AppBackgroundTheme.none:
+        return 'Ninguno';
+      case AppBackgroundTheme.dogs:
+        return 'Perros';
+      case AppBackgroundTheme.cats:
+        return 'Gatos';
+      case AppBackgroundTheme.cuadriculado:
+        return 'Cuadriculado';
+      case AppBackgroundTheme.forest:
+        return 'Bosque';
+      case AppBackgroundTheme.japan:
+        return 'Japón';
+      case AppBackgroundTheme.space:
+        return 'Espacio';
+      case AppBackgroundTheme.programming:
+        return 'Programación';
+    }
+  }
+}
+
 class AppSettings {
   final bool vibrationEnabled;
   final bool animationsEnabled;
@@ -64,6 +119,7 @@ class AppSettings {
   final bool autoSelectHintCell;
   final AppThemeModeSetting themeMode;
   final SudokuBoardTheme boardTheme;
+  final AppBackgroundTheme backgroundTheme;
   const AppSettings({
     required this.vibrationEnabled,
     required this.animationsEnabled,
@@ -73,6 +129,7 @@ class AppSettings {
     required this.autoSelectHintCell,
     required this.themeMode,
     required this.boardTheme,
+    required this.backgroundTheme,
   });
 
   AppSettings copyWith({
@@ -84,6 +141,7 @@ class AppSettings {
     bool? autoSelectHintCell,
     AppThemeModeSetting? themeMode,
     SudokuBoardTheme? boardTheme,
+    AppBackgroundTheme? backgroundTheme,
   }) {
     return AppSettings(
       vibrationEnabled: vibrationEnabled ?? this.vibrationEnabled,
@@ -95,6 +153,7 @@ class AppSettings {
       autoSelectHintCell: autoSelectHintCell ?? this.autoSelectHintCell,
       themeMode: themeMode ?? this.themeMode,
       boardTheme: boardTheme ?? this.boardTheme,
+      backgroundTheme: backgroundTheme ?? this.backgroundTheme,
     );
   }
 
@@ -108,6 +167,8 @@ class AppSettings {
       autoSelectHintCell: true,
       themeMode: AppThemeModeSetting.system,
       boardTheme: SudokuBoardTheme.classic,
+      backgroundTheme: AppBackgroundTheme.none,
+
     );
   }
 
@@ -121,6 +182,7 @@ class AppSettings {
       'autoSelectHintCell': autoSelectHintCell,
       'themeMode': themeMode.name,
       'boardTheme': boardTheme.name,
+      'backgroundTheme': backgroundTheme.name,
     };
   }
 
@@ -144,6 +206,10 @@ class AppSettings {
       boardTheme: SudokuBoardTheme.values.firstWhere(
         (e) => e.name == map['boardTheme'],
         orElse: () => SudokuBoardTheme.classic,
+      ),
+      backgroundTheme: AppBackgroundTheme.values.firstWhere(
+        (e) => e.name == map['backgroundTheme'],
+        orElse: () => AppBackgroundTheme.none,
       ),
     );
   }

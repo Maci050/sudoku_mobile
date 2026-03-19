@@ -61,4 +61,10 @@ class SettingsController extends StateNotifier<AppSettings> {
     state = state.copyWith(boardTheme: value);
     _save();
   }
+
+  void setBackgroundTheme(AppBackgroundTheme value) {
+    state = state.copyWith(backgroundTheme: value);
+    _save();
+  }
+
 }

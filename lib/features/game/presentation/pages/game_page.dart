@@ -12,6 +12,7 @@ import '../../../settings/presentation/settings_page.dart';
 import '../widgets/hint_banner.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../../settings/presentation/settings_controller.dart';
+import '../../../../core/widgets/app_themed_scaffold.dart';
 
 class GamePage extends ConsumerStatefulWidget {
   final Difficulty? startDifficulty;
@@ -135,7 +136,7 @@ class _GamePageState extends ConsumerState<GamePage>
       onPopInvokedWithResult: (_, _) {
         ref.read(gameControllerProvider.notifier).pauseGame();
       },
-      child: Scaffold(
+      child: AppThemedScaffold(
         appBar: AppBar(
           title: Text(board.isDailyChallenge ? 'Desafío diario' : 'Sudoku'),
           centerTitle: true,

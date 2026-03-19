@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sudoku_mobile/core/widgets/app_themed_scaffold.dart';
 import '../../achievements/domain/achievement.dart';
 import '../../achievements/domain/achievement_service.dart';
 import '../../achievements/presentation/achievements_page.dart';
@@ -104,7 +105,7 @@ class StatsPage extends StatelessWidget {
       : history.map((g) => g.hintsUsed).reduce((a, b) => a + b) ~/
           history.length;
 
-    return Scaffold(
+    return AppThemedScaffold(
       appBar: AppBar(
         title: const Text('Estadísticas'),
         centerTitle: true,

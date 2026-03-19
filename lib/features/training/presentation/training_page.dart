@@ -3,6 +3,7 @@ import '../data/training_levels_data.dart';
 import '../data/training_progress_storage.dart';
 import '../domain/training_level.dart';
 import 'training_session_page.dart';
+import '../../../../core/widgets/app_themed_scaffold.dart';
 
 class TrainingPage extends StatelessWidget {
   const TrainingPage({super.key});
@@ -86,7 +87,7 @@ class TrainingPage extends StatelessWidget {
       entry.value.sort((a, b) => a.order.compareTo(b.order));
     }
 
-    return Scaffold(
+    return AppThemedScaffold(
       appBar: AppBar(
         title: const Text('Entrenamiento'),
         centerTitle: true,

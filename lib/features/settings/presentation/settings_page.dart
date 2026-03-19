@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/app_settings.dart';
 import 'settings_controller.dart';
 import 'about_page.dart';
+import '../../../core/widgets/app_themed_scaffold.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -12,7 +13,7 @@ class SettingsPage extends ConsumerWidget {
     final settings = ref.watch(settingsControllerProvider);
     final controller = ref.read(settingsControllerProvider.notifier);
 
-    return Scaffold(
+    return AppThemedScaffold(
       appBar: AppBar(
         title: const Text('Ajustes'),
         centerTitle: true,
@@ -82,6 +83,33 @@ class SettingsPage extends ConsumerWidget {
                   )
                   .toList(),
             ),
+          ),
+          ListTile(
+            title: const Text('Fondo de la app'),
+            subtitle: Text(settings.backgroundTheme.label),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                showDragHandle: true,
+                builder: (_) {
+                  return ListView(
+                    children: AppBackgroundTheme.values.map((theme) {
+                      return ListTile(
+                        title: Text(theme.label),
+                        trailing: settings.backgroundTheme == theme
+                            ? const Icon(Icons.check)
+                            : null,
+                        onTap: () {
+                          controller.setBackgroundTheme(theme);
+                          Navigator.pop(context);
+                        },
+                      );
+                    }).toList(),
+                  );
+                },
+              );
+            },
           ),
           ListTile(
             title: const Text('Fondo del tablero'),

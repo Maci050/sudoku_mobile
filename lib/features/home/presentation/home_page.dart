@@ -1,6 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sudoku_mobile/core/widgets/app_themed_scaffold.dart';
+
 import '../../daily_challenge/presentation/daily_challenge_page.dart';
 import '../../game/domain/difficulty.dart';
 import '../../game/presentation/pages/game_page.dart';
@@ -11,7 +14,7 @@ import '../../settings/presentation/settings_page.dart';
 import '../../stats/presentation/stats_page.dart';
 import '../../training/presentation/training_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   SudokuTip _randomTip() {
@@ -55,127 +58,130 @@ class HomePage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tip = _randomTip();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sudoku'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const SettingsPage(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: _HomeActionButton(
-                title: 'Continuar la partida',
-                subtitle: 'Retoma tu última partida guardada',
-                filled: true,
-                icon: Icons.play_arrow,
-                onTap: () => _openContinueGame(context),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: _HomeActionButton(
-                title: 'Nueva partida',
-                filled: false,
-                onTap: () => _openNewGameSelector(context),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: _HomeActionButton(
-                title: 'Entrenamiento',
-                subtitle: 'Mejora tus habilidades con ejercicios específicos',
-                filled: false,
-                icon: Icons.fitness_center,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const TrainingPage(),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Divider(height: 1),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    _InfoCard(
-                      title: tip.title,
-                      icon: Icons.lightbulb_outline,
-                      text: tip.text,
-                      images: tip.assetImages,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: 0,
-        onDestinationSelected: (index) {
-          if (index == 1) {
-            _openDailyChallenge(context);
-          } else if (index == 2) {
-            _openHistory(context);
-          } else if (index == 3) {
+    return AppThemedScaffold(
+    appBar: AppBar(
+      title: const Text('Sudoku'),
+      centerTitle: true,
+      backgroundColor: Colors.white.withValues(alpha: 0.55),
+      elevation: 0,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          onPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const StatsPage(),
+                builder: (_) => const SettingsPage(),
               ),
             );
-          }
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Inicio',
+          },
+        ),
+      ],
+    ),
+    extendBody: true,
+    body: SafeArea(
+      child: Column(
+        children: [
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _HomeActionButton(
+              title: 'Continuar la partida',
+              subtitle: 'Retoma tu última partida guardada',
+              filled: true,
+              icon: Icons.play_arrow,
+              onTap: () => _openContinueGame(context),
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_today_outlined),
-            selectedIcon: Icon(Icons.calendar_today),
-            label: 'Desafíos diarios',
+          const SizedBox(height: 14),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _HomeActionButton(
+              title: 'Nueva partida',
+              filled: false,
+              onTap: () => _openNewGameSelector(context),
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.history_outlined),
-            selectedIcon: Icon(Icons.history),
-            label: 'Historial',
+          const SizedBox(height: 14),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _HomeActionButton(
+              title: 'Entrenamiento',
+              subtitle: 'Mejora tus habilidades con ejercicios específicos',
+              filled: false,
+              icon: Icons.fitness_center,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const TrainingPage(),
+                  ),
+                );
+              },
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: 'Estadísticas',
+          const SizedBox(height: 24),
+          const Divider(height: 1),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  _InfoCard(
+                    title: tip.title,
+                    icon: Icons.lightbulb_outline,
+                    text: tip.text,
+                    images: tip.assetImages,
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
+    ),
+    bottomNavigationBar: NavigationBar(
+      backgroundColor: Colors.white.withValues(alpha: 0.70),
+      selectedIndex: 0,
+      onDestinationSelected: (index) {
+        if (index == 1) {
+          _openDailyChallenge(context);
+        } else if (index == 2) {
+          _openHistory(context);
+        } else if (index == 3) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const StatsPage(),
+            ),
+          );
+        }
+      },
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home),
+          label: 'Inicio',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.calendar_today_outlined),
+          selectedIcon: Icon(Icons.calendar_today),
+          label: 'Desafíos diarios',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.history_outlined),
+          selectedIcon: Icon(Icons.history),
+          label: 'Historial',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.bar_chart_outlined),
+          selectedIcon: Icon(Icons.bar_chart),
+          label: 'Estadísticas',
+        ),
+      ],
+    ),
     );
   }
 }
@@ -200,7 +206,9 @@ class _HomeActionButton extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
-      color: filled ? colorScheme.primary : colorScheme.surfaceContainerHighest,
+      color: filled
+          ? colorScheme.primary
+          : colorScheme.surfaceContainerHighest.withValues(alpha: 0.88),
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -236,6 +244,7 @@ class _HomeActionButton extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle!,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
                     color: filled
@@ -294,6 +303,10 @@ class _InfoCardState extends State<_InfoCard> {
     final hasMultipleImages = widget.images.length > 1;
 
     return Card(
+      color: Theme.of(context)
+          .colorScheme
+          .surfaceContainerHighest
+          .withValues(alpha: 0.90),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

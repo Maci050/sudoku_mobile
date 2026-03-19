@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sudoku_mobile/core/widgets/app_themed_scaffold.dart';
 import '../../game/domain/difficulty.dart';
 import '../data/history_storage.dart';
 import '../domain/completed_game.dart';
@@ -32,7 +33,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppThemedScaffold(
       appBar: AppBar(
         title: const Text('Historial'),
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../game/presentation/controllers/game_controller.dart';
 import '../../game/presentation/pages/game_page.dart';
+import '../../../../core/widgets/app_themed_scaffold.dart';
 
 class DailyChallengesPage extends ConsumerWidget {
   const DailyChallengesPage({super.key});
@@ -77,7 +78,7 @@ class DailyChallengesPage extends ConsumerWidget {
     final controller = ref.read(gameControllerProvider.notifier);
     final days = _lastDays(count: 21);
 
-    return Scaffold(
+    return AppThemedScaffold(
       appBar: AppBar(
         title: const Text('Desafíos diarios'),
         centerTitle: true,
