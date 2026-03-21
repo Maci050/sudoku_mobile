@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'features/home/presentation/home_page.dart';
+import 'package:sudoku_mobile/features/tutorial/presentation/app_entry_page.dart';
 import 'features/settings/domain/app_settings.dart';
 import 'features/settings/presentation/settings_controller.dart';
 
@@ -44,7 +44,7 @@ class SudokuApp extends ConsumerWidget {
         Locale('es'), 
         Locale('en')
       ],
-      home: const HomePage(),
+      home: const AppEntryPage(),
     );
   }
 }

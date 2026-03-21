@@ -4,6 +4,7 @@ import '../domain/app_settings.dart';
 import 'settings_controller.dart';
 import 'about_page.dart';
 import '../../../core/widgets/app_themed_scaffold.dart';
+import '../../tutorial/presentation/tutorial_page.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -141,6 +142,20 @@ class SettingsPage extends ConsumerWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const AboutPage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.book),
+            title: const Text('Ver Tutorial'),
+            subtitle: const Text('Revisar el tutorial de la aplicación'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const TutorialPage(fromSettings: true),
+                ),
               );
             },
           ),
